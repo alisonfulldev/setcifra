@@ -83,9 +83,9 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
   <button class="btn" onclick="toggleScroll()" id="playBtn">▶ Rolar</button>
   <button class="btn" onclick="restartScroll()">↺</button>
   <div style="display:flex;align-items:center;gap:6px">
-  <button class="btn" onclick="speed(-0.10)" title="Diminuir velocidade">−</button>
-  <span id="speedDisplay" style="min-width:58px;text-align:center;font-weight:800;color:var(--accent)">0.7x</span>
-  <button class="btn" onclick="speed(0.10)" title="Aumentar velocidade">+</button>
+  <button class="btn" onclick="speed(-0.02)" title="Diminuir velocidade">−</button>
+  <span id="speedDisplay" style="min-width:70px;text-align:center;font-weight:800;color:var(--accent)">0.20x</span>
+  <button class="btn" onclick="speed(0.02)" title="Aumentar velocidade">+</button>
   </div>
   <button class="btn" onclick="fontSize(2)">A+</button>
   <button class="btn" onclick="fullscreen()">Tela cheia</button>
@@ -121,7 +121,7 @@ function saveSong(){
  const detectedKey=extractDeclaredKey(content.value);
  if(detectedKey) key.value=detectedKey;
  let id=songId.value||uid(), old=db.songs.find(x=>x.id===id);
- let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0};
+ let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0,scrollSpeed:old?.scrollSpeed??0.20,fontSize:old?.fontSize??26};
  if(old)Object.assign(old,s);else db.songs.push(s);persist();closeEditor();render();
 }
 function deleteCurrent(){if(confirm("Excluir esta música?")){db.songs=db.songs.filter(s=>s.id!==songId.value);db.setlist=db.setlist.filter(id=>id!==songId.value);persist();closeEditor();render()}}
@@ -160,7 +160,9 @@ function renderSheet(){
 function openStage(id){
  current=db.songs.find(s=>s.id===id);if(!current)return;
  let idx=db.setlist.indexOf(id);currentSetIndex=idx>=0?idx:-1;transpose=current.preferredTranspose||0;
- stage.classList.remove("hidden");document.documentElement.style.setProperty("--fs",(db.prefs.font||26)+"px");renderSheet();updateSpeedDisplay();stage.scrollTop=0;wakeControls();
+ if(current.scrollSpeed==null) current.scrollSpeed=0.20;
+ if(current.fontSize==null) current.fontSize=db.prefs?.font||26;
+ stage.classList.remove("hidden");document.documentElement.style.setProperty("--fs",current.fontSize+"px");renderSheet();updateSpeedDisplay();stage.scrollTop=0;wakeControls();
 }
 function exitStage(){stopScroll();stage.classList.add("hidden");current=null}
 function changeTranspose(n){transpose=(transpose+n+12)%12;current.preferredTranspose=transpose;persist();renderSheet()}
@@ -170,24 +172,37 @@ function chooseKey(){
  let desired=prompt("Digite o tom desejado (C, C#, D, D#, E, F, F#, G, G#, A, A# ou B):",NOTES_SHARP[(base+transpose)%12]);
  if(!desired)return;desired=desired.trim().toUpperCase();let idx=NOTE_INDEX[desired];if(idx===undefined)return alert("Tom inválido.");transpose=(idx-base+12)%12;current.preferredTranspose=transpose;persist();renderSheet();
 }
-function fontSize(d){db.prefs.font=Math.max(14,Math.min(56,(db.prefs.font||26)+d));persist();document.documentElement.style.setProperty("--fs",db.prefs.font+"px")}
+function fontSize(d){
+ if(!current)return;
+ current.fontSize=Math.max(14,Math.min(56,(current.fontSize??26)+d));
+ persist();
+ document.documentElement.style.setProperty("--fs",current.fontSize+"px");
+}
 function speed(d){
- db.prefs.speed=Math.max(.1,Math.min(3,(db.prefs.speed||.65)+d));
- db.prefs.speed=Math.round(db.prefs.speed*10)/10;
+ if(!current)return;
+ current.scrollSpeed=Math.max(0.02,Math.min(3,(current.scrollSpeed??0.20)+d));
+ current.scrollSpeed=Math.round(current.scrollSpeed*100)/100;
  persist();
  updateSpeedDisplay();
 }
 function updateSpeedDisplay(){
  const display=document.getElementById("speedDisplay");
- if(display) display.textContent=(db.prefs.speed||.65).toFixed(1)+"x";
+ if(display&&current) display.textContent=(current.scrollSpeed??0.20).toFixed(2)+"x";
 }
 function toggleScroll(){scrolling?stopScroll():startScroll()}
 function startScroll(){scrolling=true;playBtn.textContent="⏸ Pausar";lastTime=performance.now();raf=requestAnimationFrame(scrollTick)}
-function scrollTick(t){if(!scrolling)return;let dt=t-lastTime;lastTime=t;stage.scrollTop+=(db.prefs.speed||.65)*dt/16.67;if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){stopScroll();return}raf=requestAnimationFrame(scrollTick)}
+function scrollTick(t){
+ if(!scrolling)return;
+ let dt=Math.min(t-lastTime,50);lastTime=t;
+ const v=current?.scrollSpeed??0.20;
+ stage.scrollTop+=v*dt/16.67;
+ if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){stopScroll();return}
+ raf=requestAnimationFrame(scrollTick);
+}
 function stopScroll(){scrolling=false;playBtn.textContent="▶ Rolar";if(raf)cancelAnimationFrame(raf)}
 function restartScroll(){stopScroll();stage.scrollTo({top:0,behavior:"smooth"})}
-function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;stage.scrollTop=0;renderSheet()}
-function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;stage.scrollTop=0;renderSheet()}
+function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=0.20;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=0.20;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
 function fullscreen(){if(!document.fullscreenElement)stage.requestFullscreen?.();else document.exitFullscreen?.()}
 function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer);hideTimer=setTimeout(()=>controls.classList.add("fade"),3500)}
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
@@ -225,7 +240,7 @@ function processPastedChord(){
 }
 document.addEventListener("keydown",e=>{
  if(stage.classList.contains("hidden")||["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
- if(e.code==="Space"){e.preventDefault();toggleScroll()}else if(e.key==="ArrowRight")nextSong();else if(e.key==="ArrowLeft")previousSong();else if(e.key==="ArrowUp"){e.preventDefault();speed(-.10)}else if(e.key==="ArrowDown"){e.preventDefault();speed(.10)}else if(e.key==="+")changeTranspose(1);else if(e.key==="-")changeTranspose(-1);else if(e.key==="0")resetTranspose();else if(e.key.toLowerCase()==="f")fullscreen();else if(e.key.toLowerCase()==="r")restartScroll();
+ if(e.code==="Space"){e.preventDefault();toggleScroll()}else if(e.key==="ArrowRight")nextSong();else if(e.key==="ArrowLeft")previousSong();else if(e.key==="ArrowUp"){e.preventDefault();speed(-.02)}else if(e.key==="ArrowDown"){e.preventDefault();speed(.02)}else if(e.key==="+")changeTranspose(1);else if(e.key==="-")changeTranspose(-1);else if(e.key==="0")resetTranspose();else if(e.key.toLowerCase()==="f")fullscreen();else if(e.key.toLowerCase()==="r")restartScroll();
 });
 if(!db.songs.length){
  db.songs=[
