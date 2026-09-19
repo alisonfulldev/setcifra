@@ -84,7 +84,7 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
   <button class="btn" onclick="restartScroll()">↺</button>
   <div style="display:flex;align-items:center;gap:7px;min-width:260px">
   <button class="btn" onclick="speed(-1)" title="Diminuir velocidade">−</button>
-  <input id="speedRange" type="range" min="1" max="100" step="1" value="12"
+  <input id="speedRange" type="range" min="1" max="120" step="1" value="12"
     oninput="setSpeed(Number(this.value))"
     style="width:130px;accent-color:var(--accent)" aria-label="Velocidade da rolagem">
   <span id="speedDisplay" style="min-width:62px;text-align:center;font-weight:800;color:var(--accent)">12 px/s</span>
@@ -100,7 +100,7 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
 const NOTES_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const NOTE_INDEX={"C":0,"B#":0,"C#":1,"DB":1,"D":2,"D#":3,"EB":3,"E":4,"FB":4,"E#":5,"F":5,"F#":6,"GB":6,"G":7,"G#":8,"AB":8,"A":9,"A#":10,"BB":10,"B":11,"CB":11};
 let db=JSON.parse(localStorage.getItem("setcifra-db")||'{"songs":[],"setlist":[],"prefs":{"font":26,"speed":0.65}}');
-let current=null,currentSetIndex=-1,transpose=0,scrolling=false,raf=null,lastTime=0,hideTimer=null;
+let current=null,currentSetIndex=-1,transpose=0,scrolling=false,raf=null,lastTime=0,hideTimer=null,scrollTimer=null,scrollAccumulator=0;
 
 function persist(){localStorage.setItem("setcifra-db",JSON.stringify(db))}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
@@ -163,7 +163,8 @@ function renderSheet(){
 function openStage(id){
  current=db.songs.find(s=>s.id===id);if(!current)return;
  let idx=db.setlist.indexOf(id);currentSetIndex=idx>=0?idx:-1;transpose=current.preferredTranspose||0;
- if(current.scrollSpeed==null) current.scrollSpeed=0.20;
+ if(current.scrollSpeed==null) current.scrollSpeed=12;
+ if(current.scrollSpeed<=3) current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));
  if(current.fontSize==null) current.fontSize=db.prefs?.font||26;
  stage.classList.remove("hidden");document.documentElement.style.setProperty("--fs",current.fontSize+"px");renderSheet();updateSpeedDisplay();stage.scrollTop=0;wakeControls();
 }
@@ -183,30 +184,19 @@ function fontSize(d){
 }
 function speed(d){
  if(!current)return;
- const old=current.scrollSpeed;
- // Migrate old 0.02–3.00 multiplier values to real pixels/second.
- if(old!=null && old<=3) current.scrollSpeed=Math.max(1,Math.round(old*60));
- current.scrollSpeed=Math.max(1,Math.min(100,(current.scrollSpeed??12)+d));
+ current.scrollSpeed=Math.max(1,Math.min(120,Math.round((Number(current.scrollSpeed)||12)+d)));
  persist();
  updateSpeedDisplay();
 }
 function setSpeed(v){
  if(!current)return;
- current.scrollSpeed=Math.max(1,Math.min(100,Math.round(v)));
+ current.scrollSpeed=Math.max(1,Math.min(120,Math.round(Number(v)||12)));
  persist();
  updateSpeedDisplay();
 }
 function getRealSpeed(){
  if(!current)return 12;
- let v=current.scrollSpeed;
- if(v==null) v=12;
- // Automatic migration from previous versions.
- if(v<=3){
-   v=Math.max(1,Math.round(v*60));
-   current.scrollSpeed=v;
-   persist();
- }
- return v;
+ return Math.max(1,Math.min(120,Number(current.scrollSpeed)||12));
 }
 function updateSpeedDisplay(){
  const v=getRealSpeed();
@@ -215,33 +205,41 @@ function updateSpeedDisplay(){
  if(display) display.textContent=v+" px/s";
  if(range) range.value=v;
 }
-function toggleScroll(){scrolling?stopScroll():startScroll()}
-let scrollPosition=0;
+function toggleScroll(){
+ if(scrolling) stopScroll();
+ else startScroll();
+}
 function startScroll(){
  if(!current)return;
+ stopScroll();
  scrolling=true;
  playBtn.textContent="⏸ Pausar";
- lastTime=performance.now();
- scrollPosition=stage.scrollTop;
- raf=requestAnimationFrame(scrollTick);
+ scrollAccumulator=stage.scrollTop;
+ scrollTimer=setInterval(()=>{
+   if(!scrolling)return;
+   const pxPerSecond=getRealSpeed();
+   scrollAccumulator+=(pxPerSecond/20); // 20 atualizações por segundo
+   stage.scrollTop=Math.floor(scrollAccumulator);
+   if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){
+     stopScroll();
+   }
+ },50);
 }
-function scrollTick(t){
- if(!scrolling)return;
- const dt=Math.min(t-lastTime,100);
- lastTime=t;
- const pixelsPerSecond=getRealSpeed();
- scrollPosition+=(pixelsPerSecond*dt)/1000;
- stage.scrollTop=scrollPosition;
- if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){
-   stopScroll();
-   return;
+function stopScroll(){
+ scrolling=false;
+ playBtn.textContent="▶ Rolar";
+ if(scrollTimer){
+   clearInterval(scrollTimer);
+   scrollTimer=null;
  }
- raf=requestAnimationFrame(scrollTick);
 }
-function stopScroll(){scrolling=false;playBtn.textContent="▶ Rolar";if(raf)cancelAnimationFrame(raf)}
-function restartScroll(){stopScroll();scrollPosition=0;stage.scrollTo({top:0,behavior:"smooth"})}
-function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
-function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+function restartScroll(){
+ stopScroll();
+ scrollAccumulator=0;
+ stage.scrollTop=0;
+}
+function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
 function fullscreen(){if(!document.fullscreenElement)stage.requestFullscreen?.();else document.exitFullscreen?.()}
 function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer);hideTimer=setTimeout(()=>controls.classList.add("fade"),3500)}
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
