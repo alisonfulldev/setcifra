@@ -82,10 +82,13 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
   <button class="btn" onclick="fontSize(-2)">A−</button>
   <button class="btn" onclick="toggleScroll()" id="playBtn">▶ Rolar</button>
   <button class="btn" onclick="restartScroll()">↺</button>
-  <div style="display:flex;align-items:center;gap:6px">
-  <button class="btn" onclick="speed(-0.02)" title="Diminuir velocidade">−</button>
-  <span id="speedDisplay" style="min-width:70px;text-align:center;font-weight:800;color:var(--accent)">0.20x</span>
-  <button class="btn" onclick="speed(0.02)" title="Aumentar velocidade">+</button>
+  <div style="display:flex;align-items:center;gap:7px;min-width:260px">
+  <button class="btn" onclick="speed(-1)" title="Diminuir velocidade">−</button>
+  <input id="speedRange" type="range" min="1" max="100" step="1" value="12"
+    oninput="setSpeed(Number(this.value))"
+    style="width:130px;accent-color:var(--accent)" aria-label="Velocidade da rolagem">
+  <span id="speedDisplay" style="min-width:62px;text-align:center;font-weight:800;color:var(--accent)">12 px/s</span>
+  <button class="btn" onclick="speed(1)" title="Aumentar velocidade">+</button>
   </div>
   <button class="btn" onclick="fontSize(2)">A+</button>
   <button class="btn" onclick="fullscreen()">Tela cheia</button>
@@ -180,29 +183,65 @@ function fontSize(d){
 }
 function speed(d){
  if(!current)return;
- current.scrollSpeed=Math.max(0.02,Math.min(3,(current.scrollSpeed??0.20)+d));
- current.scrollSpeed=Math.round(current.scrollSpeed*100)/100;
+ const old=current.scrollSpeed;
+ // Migrate old 0.02–3.00 multiplier values to real pixels/second.
+ if(old!=null && old<=3) current.scrollSpeed=Math.max(1,Math.round(old*60));
+ current.scrollSpeed=Math.max(1,Math.min(100,(current.scrollSpeed??12)+d));
  persist();
  updateSpeedDisplay();
 }
+function setSpeed(v){
+ if(!current)return;
+ current.scrollSpeed=Math.max(1,Math.min(100,Math.round(v)));
+ persist();
+ updateSpeedDisplay();
+}
+function getRealSpeed(){
+ if(!current)return 12;
+ let v=current.scrollSpeed;
+ if(v==null) v=12;
+ // Automatic migration from previous versions.
+ if(v<=3){
+   v=Math.max(1,Math.round(v*60));
+   current.scrollSpeed=v;
+   persist();
+ }
+ return v;
+}
 function updateSpeedDisplay(){
+ const v=getRealSpeed();
  const display=document.getElementById("speedDisplay");
- if(display&&current) display.textContent=(current.scrollSpeed??0.20).toFixed(2)+"x";
+ const range=document.getElementById("speedRange");
+ if(display) display.textContent=v+" px/s";
+ if(range) range.value=v;
 }
 function toggleScroll(){scrolling?stopScroll():startScroll()}
-function startScroll(){scrolling=true;playBtn.textContent="⏸ Pausar";lastTime=performance.now();raf=requestAnimationFrame(scrollTick)}
+let scrollPosition=0;
+function startScroll(){
+ if(!current)return;
+ scrolling=true;
+ playBtn.textContent="⏸ Pausar";
+ lastTime=performance.now();
+ scrollPosition=stage.scrollTop;
+ raf=requestAnimationFrame(scrollTick);
+}
 function scrollTick(t){
  if(!scrolling)return;
- let dt=Math.min(t-lastTime,50);lastTime=t;
- const v=current?.scrollSpeed??0.20;
- stage.scrollTop+=v*dt/16.67;
- if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){stopScroll();return}
+ const dt=Math.min(t-lastTime,100);
+ lastTime=t;
+ const pixelsPerSecond=getRealSpeed();
+ scrollPosition+=(pixelsPerSecond*dt)/1000;
+ stage.scrollTop=scrollPosition;
+ if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){
+   stopScroll();
+   return;
+ }
  raf=requestAnimationFrame(scrollTick);
 }
 function stopScroll(){scrolling=false;playBtn.textContent="▶ Rolar";if(raf)cancelAnimationFrame(raf)}
-function restartScroll(){stopScroll();stage.scrollTo({top:0,behavior:"smooth"})}
-function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=0.20;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
-function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=0.20;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+function restartScroll(){stopScroll();scrollPosition=0;stage.scrollTo({top:0,behavior:"smooth"})}
+function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
 function fullscreen(){if(!document.fullscreenElement)stage.requestFullscreen?.();else document.exitFullscreen?.()}
 function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer);hideTimer=setTimeout(()=>controls.classList.add("fade"),3500)}
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
