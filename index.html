@@ -1,2235 +1,253 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SetCifra</title>
-
+<title>SetCifra — Modo Palco</title>
 <style>
-:root{
-  --bg:#0b0b0d;
-  --panel:#151519;
-  --panel2:#1e1e24;
-  --text:#f4f4f5;
-  --muted:#9ca3af;
-  --accent:#facc15;
-  --border:#2b2b32;
-  --fs:26px;
-}
-
-*{box-sizing:border-box}
-
-html{scroll-behavior:smooth}
-
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
-}
-
-button,input,textarea,select{font:inherit}
-
-.app{
-  max-width:1200px;
-  margin:auto;
-  padding:18px;
-}
-
-.top{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:18px;
-}
-
-.brand{
-  font-weight:900;
-  font-size:24px;
-}
-
-.brand span{color:var(--accent)}
-
-.actions,.row{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.btn{
-  border:1px solid var(--border);
-  background:var(--panel2);
-  color:var(--text);
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-.btn:hover{border-color:#555}
-
-.primary{
-  background:var(--accent);
-  color:#111;
-  border-color:var(--accent);
-  font-weight:800;
-}
-
-.danger{
-  color:#fecaca;
-  border-color:#7f1d1d;
-}
-
-.search{
-  width:100%;
-  padding:16px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  background:var(--panel);
-  color:white;
-  font-size:18px;
-  outline:none;
-}
-
-.search:focus{border-color:var(--accent)}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  margin-top:14px;
-}
-
-.card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px;
-}
-
-.card h2{
-  margin:0 0 12px;
-  font-size:17px;
-}
-
-.song{
-  padding:12px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  margin:8px 0;
-  cursor:pointer;
-}
-
-.song:hover{border-color:var(--accent)}
-
-.song small{color:var(--muted)}
-
-.hidden{display:none!important}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:#000b;
-  z-index:30;
-  display:grid;
-  place-items:center;
-  padding:16px;
-}
-
-.modalbox{
-  width:min(760px,100%);
-  max-height:92vh;
-  overflow:auto;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:18px;
-}
-
-.field{margin:10px 0}
-
-.field label{
-  display:block;
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:5px;
-}
-
-.field input,
-.field textarea,
-.field select{
-  width:100%;
-  padding:11px;
-  border-radius:9px;
-  border:1px solid var(--border);
-  background:#0e0e11;
-  color:white;
-}
-
-.field textarea{
-  min-height:350px;
-  font-family:monospace;
-  white-space:pre;
-}
-
-.stage{
-  position:fixed;
-  inset:0;
-  background:#050505;
-  z-index:20;
-  overflow:auto;
-}
-
-.stageHeader{
-  position:sticky;
-  top:0;
-  z-index:4;
-  background:#050505ef;
-  backdrop-filter:blur(8px);
-  border-bottom:1px solid #222;
-  padding:10px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-}
-
-.stageTitle{
-  min-width:0;
-}
-
-.stageTitle b{
-  display:block;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.stageTitle small{color:#aaa}
-
-.stageBody{
-  max-width:1050px;
-  margin:auto;
-  padding:30px 24px 45vh;
-}
-
-.chordSheet{
-  font-family:monospace;
-  font-size:var(--fs);
-  line-height:1.55;
-  white-space:pre-wrap;
-}
-
-.chordLine{
-  color:var(--accent);
-  font-weight:800;
-  min-height:1em;
-}
-
-.lyricLine{
-  color:#fff;
-  min-height:1em;
-}
-
-.plainLine{
-  color:#ddd;
-  min-height:1em;
-}
-
-.controls{
-  position:fixed;
-  z-index:6;
-  left:50%;
-  bottom:14px;
-  transform:translateX(-50%);
-  display:flex;
-  gap:7px;
-  flex-wrap:wrap;
-  justify-content:center;
-  width:min(980px,95%);
-  background:#111e;
-  border:1px solid #333;
-  padding:9px;
-  border-radius:14px;
-  transition:.25s;
-}
-
-.controls.fade{opacity:.08}
-.controls:hover{opacity:1}
-
-.pill{
-  color:#111;
-  background:var(--accent);
-  padding:6px 10px;
-  border-radius:999px;
-  font-weight:900;
-}
-
-.muted{color:var(--muted)}
-
-.empty{
-  padding:25px;
-  text-align:center;
-  color:var(--muted);
-}
-
-.setlistItem{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  border-bottom:1px solid var(--border);
-  padding:9px 0;
-}
-
-@media(max-width:760px){
-  .grid{grid-template-columns:1fr}
-  .app{padding:12px}
-  .stageBody{padding:24px 14px 45vh}
-  .chordSheet{font-size:calc(var(--fs) * .85)}
-}
+:root{--bg:#0b0b0d;--panel:#151519;--panel2:#1e1e24;--text:#f4f4f5;--muted:#9ca3af;--accent:#facc15;--danger:#ef4444;--border:#2b2b32;--fs:26px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padding:18px}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}.brand{font-weight:900;font-size:24px}.brand span{color:var(--accent)}
+.actions,.row{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer}.btn:hover{border-color:#555}.primary{background:var(--accent);color:#111;border-color:var(--accent);font-weight:800}.danger{color:#fecaca;border-color:#7f1d1d}
+.search{width:100%;padding:16px;border-radius:14px;border:1px solid var(--border);background:var(--panel);color:white;font-size:18px;outline:none}.search:focus{border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px}.card h2{margin:0 0 12px;font-size:17px}.song{padding:12px;border:1px solid var(--border);border-radius:10px;margin:8px 0;cursor:pointer}.song:hover{border-color:var(--accent)}.song small{color:var(--muted)}
+.hidden{display:none!important}.modal{position:fixed;inset:0;background:#000b;z-index:30;display:grid;place-items:center;padding:16px}.modalbox{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px}.field{margin:10px 0}.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:11px;border-radius:9px;border:1px solid var(--border);background:#0e0e11;color:white}.field textarea{min-height:320px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+.stage{position:fixed;inset:0;background:#050505;z-index:20;overflow:auto}.stageHeader{position:sticky;top:0;z-index:4;background:#050505eF;backdrop-filter:blur(8px);border-bottom:1px solid #222;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}.stageTitle{min-width:0}.stageTitle b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stageTitle small{color:#aaa}
+.stageBody{max-width:1050px;margin:auto;padding:30px 24px 45vh}.chordSheet{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs);line-height:1.55;white-space:pre-wrap;word-break:normal}.chordLine{color:var(--accent);font-weight:800;min-height:1em}.lyricLine{color:#fff;min-height:1em}.plainLine{color:#ddd;min-height:1em}
+.controls{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:7px;flex-wrap:wrap;justify-content:center;width:min(980px,95%);background:#111e;border:1px solid #333;padding:9px;border-radius:14px;transition:.25s}.controls.fade{opacity:.08}.controls:hover{opacity:1}.controls .btn{padding:9px 11px}
+.pill{color:#111;background:var(--accent);padding:6px 10px;border-radius:999px;font-weight:900}.muted{color:var(--muted)}.empty{padding:25px;text-align:center;color:var(--muted)}
+.setlistItem{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding:9px 0}.setlistItem:last-child{border:0}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.app{padding:12px}.stageBody{padding:24px 14px 45vh}.chordSheet{font-size:calc(var(--fs) * .85)}.stageHeader{align-items:flex-start}.controls{bottom:6px}}
 </style>
 </head>
-
 <body>
-
-<div class="app">
-
-<div class="top">
-
-<div>
-<div class="brand">Set<span>Cifra</span></div>
-<div class="muted">Seu repertório de palco</div>
+<div class="app" id="home">
+  <div class="top">
+    <div><div class="brand">Set<span>Cifra</span></div><div class="muted">Seu repertório de palco</div></div>
+    <div class="actions">
+      <button class="btn" onclick="exportBackup()">Exportar</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()">Importar</button>
+      <input id="importFile" type="file" accept=".json" class="hidden" onchange="importBackup(event)">
+      <button class="btn primary" onclick="openEditor()">+ Colar cifra</button>
+    </div>
+  </div>
+  <input id="search" class="search" placeholder="Buscar música ou artista..." oninput="render()">
+  <div class="grid">
+    <section class="card"><h2>Biblioteca</h2><div id="songs"></div></section>
+    <section class="card">
+      <div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Repertório do show</h2><button class="btn" onclick="clearSetlist()">Limpar</button></div>
+      <div id="setlist"></div>
+      <div style="margin-top:12px"><button class="btn primary" onclick="startSetlist()">Abrir modo palco</button></div>
+    </section>
+  </div>
 </div>
 
-<div class="actions">
-
-<button class="btn" onclick="exportBackup()">
-Exportar backup
-</button>
-
-<button class="btn" onclick="document.getElementById('importFile').click()">
-Restaurar backup
-</button>
-
-<input
-id="importFile"
-type="file"
-accept=".json"
-class="hidden"
-onchange="importBackup(event)"
->
-
-<button class="btn primary" onclick="openEditor()">
-+ Colar cifra
-</button>
-
-</div>
-</div>
-
-<input
-id="search"
-class="search"
-placeholder="Buscar música ou artista..."
-oninput="render()"
->
-
-<div class="grid">
-
-<section class="card">
-
-<h2>Biblioteca</h2>
-
-<div id="songs"></div>
-
-</section>
-
-<section class="card">
-
-<div class="row" style="justify-content:space-between;align-items:center">
-
-<h2 style="margin:0">
-Repertório do show
-</h2>
-
-<button class="btn" onclick="clearSetlist()">
-Limpar
-</button>
-
-</div>
-
-<div id="setlist"></div>
-
-<div style="margin-top:12px">
-
-<button class="btn primary" onclick="startSetlist()">
-Abrir modo palco
-</button>
-
-</div>
-
-</section>
-
-</div>
-</div>
-
-
-<!-- MODAL COLAR CIFRA -->
 
 <div id="editor" class="modal hidden">
-
-<div class="modalbox">
-
-<div class="row" style="justify-content:space-between">
-
-<h2 id="editorTitle">
-Colar cifra
-</h2>
-
-<button class="btn" onclick="closeEditor()">
-Fechar
-</button>
-
-</div>
-
-<input type="hidden" id="songId">
-
-<div class="grid">
-
-<div class="field">
-
-<label>Música</label>
-
-<input
-id="title"
-placeholder="Ex.: Reina Em Mim"
->
-
-</div>
-
-<div class="field">
-
-<label>Artista</label>
-
-<input
-id="artist"
-placeholder="Ex.: Vineyard"
->
-
-</div>
-
-</div>
-
-
-<div class="grid">
-
-<div class="field">
-
-<label>Tom original</label>
-
-<select id="key"></select>
-
-</div>
-
-<div class="field">
-
-<label>Duração</label>
-
-<input
-id="duration"
-placeholder="03:40"
->
-
-</div>
-
-</div>
-
-
-<div class="field">
-
-<label>
-Cole a cifra exatamente como foi copiada do navegador
-</label>
-
-<textarea
-id="content"
-placeholder="**Tom: C**
-
-[Intro] **G9** **F** **G9** **F**
-
-**C9** **G** **F9**
-Trecho da letra..."
-></textarea>
-
+ <div class="modalbox">
+  <div class="row" style="justify-content:space-between"><h2 id="editorTitle">Colar cifra</h2><button class="btn" onclick="closeEditor()">Fechar</button></div>
+  <input type="hidden" id="songId">
+  <div class="grid">
+   <div class="field"><label>Música</label><input id="title"></div>
+   <div class="field"><label>Artista</label><input id="artist"></div>
+  </div>
+  <div class="grid">
+   <div class="field"><label>Tom original</label><select id="key"></select></div>
+   <div class="field"><label>Duração (mm:ss)</label><input id="duration" placeholder="03:40"></div>
+  </div>
+  <div class="field">
+<label>Cole a cifra exatamente como foi copiada do navegador</label>
+<textarea id="content" placeholder="Ex.: **Tom: C**&#10;&#10;[Intro] **G9** **F** **G9** **F**&#10;&#10;**C9** **G** **F9**&#10;Trecho da letra..."></textarea>
 <div class="row" style="margin-top:8px">
-
-<button
-class="btn"
-onclick="processPastedChord()"
->
-Limpar e organizar
-</button>
-
-<span
-id="processInfo"
-class="muted"
-style="align-self:center"
-></span>
-
-</div>
-
-</div>
-
-
-<div class="row">
-
-<button
-class="btn primary"
-onclick="saveSong()"
->
-Salvar música
-</button>
-
-<button
-class="btn danger"
-id="deleteBtn"
-onclick="deleteCurrent()"
->
-Excluir
-</button>
-
-</div>
-
+<button class="btn" type="button" onclick="processPastedChord()">Limpar e organizar</button>
+<span id="processInfo" class="muted" style="align-self:center"></span>
 </div>
 </div>
-
-
-<!-- MODO PALCO -->
-
-<div
-id="stage"
-class="stage hidden"
-onmousemove="wakeControls()"
-ontouchstart="wakeControls()"
->
-
-<div class="stageHeader">
-
-<div class="stageTitle">
-
-<b id="stageName"></b>
-
-<small id="stageArtist"></small>
-
+  <div class="row"><button class="btn primary" onclick="saveSong()">Salvar música</button><button class="btn danger" id="deleteBtn" onclick="deleteCurrent()">Excluir</button></div>
+ </div>
 </div>
 
-<div class="row" style="align-items:center">
-
-<span id="stageCount" class="muted"></span>
-
-<span id="keyPill" class="pill"></span>
-
-<button class="btn" onclick="exitStage()">
-Sair
-</button>
-
+<div id="stage" class="stage hidden" onmousemove="wakeControls()" ontouchstart="wakeControls()">
+ <div class="stageHeader">
+  <div class="stageTitle"><b id="stageName"></b><small id="stageArtist"></small></div>
+  <div class="row" style="align-items:center"><span id="stageCount" class="muted"></span><span id="keyPill" class="pill"></span><button class="btn" onclick="exitStage()">Sair</button></div>
+ </div>
+ <div class="stageBody"><div id="sheet" class="chordSheet"></div></div>
+ <div id="controls" class="controls">
+  <button class="btn" onclick="previousSong()">←</button>
+  <button class="btn" onclick="changeTranspose(-1)">Tom −</button>
+  <button class="btn" onclick="resetTranspose()">Original</button>
+  <button class="btn" onclick="chooseKey()">Tom +</button>
+  <button class="btn" onclick="fontSize(-2)">A−</button>
+  <button class="btn" onclick="toggleScroll()" id="playBtn">▶ Rolar</button>
+  <button class="btn" onclick="restartScroll()">↺</button>
+  <div style="display:flex;align-items:center;gap:6px">
+  <button class="btn" onclick="speed(-0.10)" title="Diminuir velocidade">−</button>
+  <span id="speedDisplay" style="min-width:58px;text-align:center;font-weight:800;color:var(--accent)">0.7x</span>
+  <button class="btn" onclick="speed(0.10)" title="Aumentar velocidade">+</button>
+  </div>
+  <button class="btn" onclick="fontSize(2)">A+</button>
+  <button class="btn" onclick="fullscreen()">Tela cheia</button>
+  <button class="btn primary" onclick="nextSong()">Próxima →</button>
+ </div>
 </div>
-
-</div>
-
-
-<div class="stageBody">
-
-<div
-id="sheet"
-class="chordSheet"
-></div>
-
-</div>
-
-
-<div id="controls" class="controls">
-
-<button class="btn" onclick="previousSong()">
-←
-</button>
-
-<button class="btn" onclick="changeTranspose(-1)">
-Tom −
-</button>
-
-<button class="btn" onclick="resetTranspose()">
-Original
-</button>
-
-<button class="btn" onclick="chooseKey()">
-Escolher tom
-</button>
-
-<button class="btn" onclick="fontSize(-2)">
-A−
-</button>
-
-<button
-class="btn"
-onclick="toggleScroll()"
-id="playBtn"
->
-▶ Rolar
-</button>
-
-<button class="btn" onclick="restartScroll()">
-↺
-</button>
-
-<button class="btn" onclick="speed(-0.15)">
-Lento
-</button>
-
-<button class="btn" onclick="speed(0.15)">
-Rápido
-</button>
-
-<button class="btn" onclick="fontSize(2)">
-A+
-</button>
-
-<button class="btn" onclick="fullscreen()">
-Tela cheia
-</button>
-
-<button
-class="btn primary"
-onclick="nextSong()"
->
-Próxima →
-</button>
-
-</div>
-</div>
-
 
 <script>
-
-const NOTES_SHARP=[
-"C","C#","D","D#","E","F",
-"F#","G","G#","A","A#","B"
-];
-
-const NOTE_INDEX={
-"C":0,
-"B#":0,
-
-"C#":1,
-"DB":1,
-
-"D":2,
-
-"D#":3,
-"EB":3,
-
-"E":4,
-"FB":4,
-
-"E#":5,
-"F":5,
-
-"F#":6,
-"GB":6,
-
-"G":7,
-
-"G#":8,
-"AB":8,
-
-"A":9,
-
-"A#":10,
-"BB":10,
-
-"B":11,
-"CB":11
-};
-
-
-let db=JSON.parse(
-localStorage.getItem("setcifra-db") ||
-'{"songs":[],"setlist":[],"prefs":{"font":26,"speed":0.65}}'
-);
-
-let current=null;
-
-let currentSetIndex=-1;
-
-let transpose=0;
-
-let scrolling=false;
-
-let raf=null;
-
-let lastTime=0;
-
-let hideTimer=null;
-
-
-/* SALVAR */
-
-function persist(){
-
-localStorage.setItem(
-"setcifra-db",
-JSON.stringify(db)
-);
-
-}
-
-
-/* SEGURANÇA HTML */
-
-function esc(s){
-
-return String(s ?? "")
-.replace(/[&<>"']/g,m=>({
-
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#039;"
-
-}[m]));
-
-}
-
-
-/* ID */
-
-function uid(){
-
-return Date.now().toString(36)
-+
-Math.random().toString(36).slice(2,7);
-
-}
-
-
-/* TONS */
-
-function fillKeys(){
-
-key.innerHTML=
-NOTES_SHARP.map(n=>
-
-`<option>${n}</option>`
-
-).join("");
-
-}
-
-fillKeys();
-
-
-/* LIMPAR CIFRA COPIADA */
-
-function cleanPastedChord(raw){
-
-let s=String(raw || "");
-
-/* espaço especial do navegador */
-
-s=s
-.replace(/\u00A0/g," ")
-.replace(/\u2007/g," ")
-.replace(/\u202F/g," ");
-
-
-/* remove ** */
-
-s=s.replace(
-/\*\*(.*?)\*\*/g,
-"$1"
-);
-
-
-/* remove __ */
-
-s=s.replace(
-/__([^_]+)__/g,
-"$1"
-);
-
-
-/* normaliza quebra */
-
-s=s.replace(/\r\n?/g,"\n");
-
-
-/* remove espaço no fim da linha */
-
-s=s
-.split("\n")
-.map(line=>
-
-line.replace(/[ \t]+$/g,"")
-
-)
-.join("\n");
-
-
-/* evita buracos enormes */
-
-s=s.replace(
-/\n{4,}/g,
-"\n\n\n"
-);
-
-return s.trim();
-
-}
-
-
-/* DETECTAR TOM */
-
-function extractDeclaredKey(text){
-
-const m=
-String(text).match(
-
-/(?:^|\n)\s*Tom\s*:\s*([A-G](?:#|b)?)/i
-
-);
-
-return m
-?
-normalizeDetectedKey(m[1])
-:
-null;
-
-}
-
-
-function normalizeDetectedKey(k){
-
-const idx=
-NOTE_INDEX[
-String(k).toUpperCase()
-];
-
-return idx===undefined
-?
-null
-:
-NOTES_SHARP[idx];
-
-}
-
-
-/* BOTÃO ORGANIZAR */
-
-function processPastedChord(){
-
-const cleaned=
-cleanPastedChord(
-content.value
-);
-
-content.value=cleaned;
-
-const detected=
-extractDeclaredKey(cleaned);
-
-if(detected){
-
-key.value=detected;
-
-processInfo.textContent=
-"Tom detectado: "+detected;
-
-}else{
-
-processInfo.textContent=
-"Cifra organizada. Confira o tom.";
-
-}
-
-}
-
-
-/* RENDER */
+const NOTES_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const NOTE_INDEX={"C":0,"B#":0,"C#":1,"DB":1,"D":2,"D#":3,"EB":3,"E":4,"FB":4,"E#":5,"F":5,"F#":6,"GB":6,"G":7,"G#":8,"AB":8,"A":9,"A#":10,"BB":10,"B":11,"CB":11};
+let db=JSON.parse(localStorage.getItem("setcifra-db")||'{"songs":[],"setlist":[],"prefs":{"font":26,"speed":0.65}}');
+let current=null,currentSetIndex=-1,transpose=0,scrolling=false,raf=null,lastTime=0,hideTimer=null;
+
+function persist(){localStorage.setItem("setcifra-db",JSON.stringify(db))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function fillKeys(){key.innerHTML=NOTES_SHARP.map(n=>`<option>${n}</option>`).join("")} fillKeys();
 
 function render(){
-
-const q=
-search.value
-.trim()
-.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g,"");
-
-
-const filtered=
-db.songs.filter(s=>
-
-(s.title+" "+s.artist)
-
-.toLowerCase()
-
-.normalize("NFD")
-
-.replace(/[\u0300-\u036f]/g,"")
-
-.includes(q)
-
-);
-
-
-songs.innerHTML=
-filtered.length
-?
-filtered.map(s=>
-
-`
-<div
-class="song"
-onclick="openStage('${s.id}')"
->
-
-<b>${esc(s.title)}</b>
-
-<br>
-
-<small>
-${esc(s.artist)} · Tom ${esc(s.key)}
-</small>
-
-<div
-class="row"
-style="margin-top:8px"
->
-
-<button
-class="btn"
-onclick="
-event.stopPropagation();
-addSetlist('${s.id}')
-"
->
-+ Repertório
-</button>
-
-<button
-class="btn"
-onclick="
-event.stopPropagation();
-openEditor('${s.id}')
-"
->
-Editar
-</button>
-
-</div>
-
-</div>
-`
-
-).join("")
-
-:
-
-`<div class="empty">
-Nenhuma música encontrada.
-</div>`;
-
-
-
-setlist.innerHTML=
-db.setlist.length
-?
-db.setlist.map((id,i)=>{
-
-let s=
-db.songs.find(x=>x.id===id);
-
-if(!s)return "";
-
-return `
-
-<div class="setlistItem">
-
-<span>
-
-<b>
-${i+1}. ${esc(s.title)}
-</b>
-
-<br>
-
-<small class="muted">
-${esc(s.artist)}
-</small>
-
-</span>
-
-<span>
-
-<button
-class="btn"
-onclick="moveItem(${i},-1)"
->
-↑
-</button>
-
-<button
-class="btn"
-onclick="moveItem(${i},1)"
->
-↓
-</button>
-
-<button
-class="btn"
-onclick="removeSet(${i})"
->
-×
-</button>
-
-</span>
-
-</div>
-
-`;
-
-}).join("")
-
-:
-
-`<div class="empty">
-Adicione músicas ao repertório.
-</div>`;
-
+ const q=search.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+ const filtered=db.songs.filter(s=>(s.title+" "+s.artist).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").includes(q));
+ songs.innerHTML=filtered.length?filtered.map(s=>`<div class="song" onclick="openStage('${s.id}')"><b>${esc(s.title)}</b><br><small>${esc(s.artist)} · Tom ${esc(s.key)}</small><div class="row" style="margin-top:8px"><button class="btn" onclick="event.stopPropagation();addSetlist('${s.id}')">+ Repertório</button><button class="btn" onclick="event.stopPropagation();openEditor('${s.id}')">Editar</button></div></div>`).join(""):`<div class="empty">Nenhuma música encontrada.</div>`;
+ setlist.innerHTML=db.setlist.length?db.setlist.map((id,i)=>{let s=db.songs.find(x=>x.id===id);return s?`<div class="setlistItem"><span><b>${i+1}. ${esc(s.title)}</b><br><small class="muted">${esc(s.artist)}</small></span><span><button class="btn" onclick="moveItem(${i},-1)">↑</button> <button class="btn" onclick="moveItem(${i},1)">↓</button> <button class="btn" onclick="removeSet(${i})">×</button></span></div>`:""}).join(""):`<div class="empty">Adicione músicas ao repertório.</div>`;
 }
-
-
-/* EDITOR */
-
 function openEditor(id=""){
-
-let s=
-db.songs.find(
-x=>x.id===id
-);
-
-editor.classList.remove(
-"hidden"
-);
-
-songId.value=s?.id || "";
-
-title.value=s?.title || "";
-
-artist.value=s?.artist || "";
-
-key.value=s?.key || "C";
-
-duration.value=s?.duration || "";
-
-content.value=s?.content || "";
-
-processInfo.textContent="";
-
-editorTitle.textContent=
-s
-?
-"Editar música"
-:
-"Colar cifra";
-
-deleteBtn.classList.toggle(
-"hidden",
-!s
-);
-
+ let s=db.songs.find(x=>x.id===id);
+ editor.classList.remove("hidden"); songId.value=s?.id||""; title.value=s?.title||""; artist.value=s?.artist||""; key.value=s?.key||"C"; duration.value=s?.duration||""; content.value=s?.content||""; editorTitle.textContent=s?"Editar música":"Colar cifra"; deleteBtn.classList.toggle("hidden",!s);
 }
-
-
-function closeEditor(){
-
-editor.classList.add(
-"hidden"
-);
-
-}
-
-
-/* SALVAR MÚSICA */
-
+function closeEditor(){editor.classList.add("hidden")}
 function saveSong(){
-
-if(
-!title.value.trim()
-||
-!content.value.trim()
-){
-
-return alert(
-"Informe o nome e a cifra."
-);
-
+ if(!title.value.trim()||!content.value.trim())return alert("Informe o nome e a cifra/letra.");
+ content.value=cleanPastedChord(content.value);
+ const detectedKey=extractDeclaredKey(content.value);
+ if(detectedKey) key.value=detectedKey;
+ let id=songId.value||uid(), old=db.songs.find(x=>x.id===id);
+ let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0};
+ if(old)Object.assign(old,s);else db.songs.push(s);persist();closeEditor();render();
 }
-
-
-content.value=
-cleanPastedChord(
-content.value
-);
-
-
-const detectedKey=
-extractDeclaredKey(
-content.value
-);
-
-
-if(detectedKey){
-
-key.value=detectedKey;
-
-}
-
-
-let id=
-songId.value || uid();
-
-
-let old=
-db.songs.find(
-x=>x.id===id
-);
-
-
-let s={
-
-id,
-
-title:
-title.value.trim(),
-
-artist:
-artist.value.trim(),
-
-key:
-key.value,
-
-duration:
-duration.value.trim(),
-
-content:
-content.value,
-
-preferredTranspose:
-old?.preferredTranspose || 0
-
-};
-
-
-if(old){
-
-Object.assign(
-old,
-s
-);
-
-}else{
-
-db.songs.push(s);
-
-}
-
-
-persist();
-
-closeEditor();
-
-render();
-
-}
-
-
-/* EXCLUIR */
-
-function deleteCurrent(){
-
-if(
-confirm(
-"Excluir esta música?"
-)
-){
-
-db.songs=
-db.songs.filter(
-s=>s.id!==songId.value
-);
-
-db.setlist=
-db.setlist.filter(
-id=>id!==songId.value
-);
-
-persist();
-
-closeEditor();
-
-render();
-
-}
-
-}
-
-
-/* REPERTÓRIO */
-
-function addSetlist(id){
-
-db.setlist.push(id);
-
-persist();
-
-render();
-
-}
-
-
-function removeSet(i){
-
-db.setlist.splice(i,1);
-
-persist();
-
-render();
-
-}
-
-
-function moveItem(i,d){
-
-let j=i+d;
-
-if(
-j<0 ||
-j>=db.setlist.length
-)return;
-
-
-[
-db.setlist[i],
-db.setlist[j]
-]
-=
-[
-db.setlist[j],
-db.setlist[i]
-];
-
-
-persist();
-
-render();
-
-}
-
-
-function clearSetlist(){
-
-if(
-confirm(
-"Limpar repertório?"
-)
-){
-
-db.setlist=[];
-
-persist();
-
-render();
-
-}
-
-}
-
-
-function startSetlist(){
-
-if(
-!db.setlist.length
-){
-
-return alert(
-"Adicione músicas ao repertório."
-);
-
-}
-
-currentSetIndex=0;
-
-openStage(
-db.setlist[0]
-);
-
-}
-
-
-/* IDENTIFICAR LINHA DE ACORDES */
+function deleteCurrent(){if(confirm("Excluir esta música?")){db.songs=db.songs.filter(s=>s.id!==songId.value);db.setlist=db.setlist.filter(id=>id!==songId.value);persist();closeEditor();render()}}
+function addSetlist(id){db.setlist.push(id);persist();render()}
+function removeSet(i){db.setlist.splice(i,1);persist();render()}
+function moveItem(i,d){let j=i+d;if(j<0||j>=db.setlist.length)return;[db.setlist[i],db.setlist[j]]=[db.setlist[j],db.setlist[i]];persist();render()}
+function clearSetlist(){if(confirm("Limpar repertório?")){db.setlist=[];persist();render()}}
+function startSetlist(){if(!db.setlist.length)return alert("Adicione músicas ao repertório.");currentSetIndex=0;openStage(db.setlist[0])}
 
 function isChordLine(line){
-
-let t=line.trim();
-
-if(!t)return false;
-
-
-let tokens=
-t.split(/\s+/)
-.filter(Boolean);
-
-
-if(!tokens.length)
-return false;
-
-
-let good=
-tokens.filter(x=>
-
-/^[A-G](#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:\([^)]*\))?(?:[#b]?[0-9]+)*(?:\/[A-G](#|b)?)?$/.test(x)
-
-||
-
-["|",":","/","-"].includes(x)
-
-);
-
-
-return(
-good.length /
-tokens.length
-)>=0.65;
-
+ let t=line.trim(); if(!t)return false;
+ let tokens=t.split(/\s+/).filter(Boolean); if(!tokens.length)return false;
+ let good=tokens.filter(x=>/^[A-G](#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:\([^)]*\))?(?:[#b]?[0-9]+)*(?:\/[A-G](#|b)?)?$/.test(x)||["|",":","/","-"].includes(x));
+ return good.length/tokens.length>=0.65;
 }
-
-
-/* TRANSPOSIÇÃO */
-
-function transposeNote(
-note,
-steps
-){
-
-let idx=
-NOTE_INDEX[
-note.toUpperCase()
-];
-
-
-if(idx===undefined)
-return note;
-
-
-return NOTES_SHARP[
-(idx+steps+120)%12
-];
-
+function transposeNote(note,steps){
+ let idx=NOTE_INDEX[note.toUpperCase()];if(idx===undefined)return note;
+ return NOTES_SHARP[(idx+steps+120)%12];
 }
-
-
-function transposeChordToken(
-tok,
-steps
-){
-
-return tok.replace(
-
-/^([A-G](?:#|b)?)(.*?)(?:\/([A-G](?:#|b)?))?$/,
-
-(
-_,
-root,
-middle,
-bass
-)=>
-
-transposeNote(
-root,
-steps
-)
-
-+
-
-middle
-
-+
-
-(
-bass
-?
-"/"+
-transposeNote(
-bass,
-steps
-)
-:
-""
-)
-
-);
-
+function transposeChordToken(tok,steps){
+ return tok.replace(/^([A-G](?:#|b)?)(.*?)(?:\/([A-G](?:#|b)?))?$/,(_,root,middle,bass)=>transposeNote(root,steps)+middle+(bass?"/"+transposeNote(bass,steps):""));
 }
-
-
-function transposeLine(
-line,
-steps
-){
-
-return line.replace(
-
-/(?<![A-Za-z])([A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:\([^)]*\))?(?:[#b]?[0-9]+)*(?:\/[A-G](?:#|b)?)?)(?![A-Za-z])/g,
-
-m=>
-transposeChordToken(
-m,
-steps
-)
-
-);
-
+function transposeLine(line,steps){
+ return line.replace(/(?<![A-Za-z])([A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:\([^)]*\))?(?:[#b]?[0-9]+)*(?:\/[A-G](?:#|b)?)?)(?![A-Za-z])/g,m=>transposeChordToken(m,steps));
 }
-
-
-/* DESENHAR CIFRA */
-
 function renderSheet(){
-
-if(!current)return;
-
-
-sheet.innerHTML=
-
-current.content
-
-.split("\n")
-
-.map(line=>{
-
-let chord=
-isChordLine(line);
-
-
-let out=
-chord
-?
-transposeLine(
-line,
-transpose
-)
-:
-line;
-
-
-return `
-
-<div
-class="${
-chord
-?
-"chordLine"
-:
-line.trim()
-?
-"lyricLine"
-:
-"plainLine"
-}"
->
-
-${esc(out)||"&nbsp;"}
-
-</div>
-
-`;
-
-})
-.join("");
-
-
-let base=
-NOTE_INDEX[
-current.key.toUpperCase()
-] ?? 0;
-
-
-keyPill.textContent=
-
-"Tom: "
-
-+
-
-NOTES_SHARP[
-(base+transpose+120)%12
-];
-
-
-stageName.textContent=
-current.title;
-
-
-stageArtist.textContent=
-current.artist || "";
-
-
-stageCount.textContent=
-
-currentSetIndex>=0
-?
-`${currentSetIndex+1} / ${db.setlist.length}`
-:
-"";
-
+ if(!current)return;
+ sheet.innerHTML=current.content.split("\n").map(line=>{
+  let chord=isChordLine(line), out=chord?transposeLine(line,transpose):line;
+  return `<div class="${chord?"chordLine":line.trim()?"lyricLine":"plainLine"}">${esc(out)||"&nbsp;"}</div>`;
+ }).join("");
+ let base=NOTE_INDEX[current.key.toUpperCase()]??0; keyPill.textContent="Tom: "+NOTES_SHARP[(base+transpose+120)%12];
+ stageName.textContent=current.title;stageArtist.textContent=current.artist||"";
+ stageCount.textContent=currentSetIndex>=0?`${currentSetIndex+1} / ${db.setlist.length}`:"";
 }
-
-
-/* ABRIR PALCO */
-
 function openStage(id){
-
-current=
-db.songs.find(
-s=>s.id===id
-);
-
-
-if(!current)return;
-
-
-let idx=
-db.setlist.indexOf(id);
-
-
-currentSetIndex=
-idx>=0
-?
-idx
-:
--1;
-
-
-transpose=
-current.preferredTranspose || 0;
-
-
-stage.classList.remove(
-"hidden"
-);
-
-
-document.documentElement
-.style.setProperty(
-
-"--fs",
-
-(db.prefs.font || 26)
-+
-"px"
-
-);
-
-
-renderSheet();
-
-stage.scrollTop=0;
-
-wakeControls();
-
+ current=db.songs.find(s=>s.id===id);if(!current)return;
+ let idx=db.setlist.indexOf(id);currentSetIndex=idx>=0?idx:-1;transpose=current.preferredTranspose||0;
+ stage.classList.remove("hidden");document.documentElement.style.setProperty("--fs",(db.prefs.font||26)+"px");renderSheet();updateSpeedDisplay();stage.scrollTop=0;wakeControls();
 }
-
-
-function exitStage(){
-
-stopScroll();
-
-stage.classList.add(
-"hidden"
-);
-
-current=null;
-
-}
-
-
-/* MUDAR TOM */
-
-function changeTranspose(n){
-
-transpose=
-(transpose+n+12)%12;
-
-
-current.preferredTranspose=
-transpose;
-
-
-persist();
-
-renderSheet();
-
-}
-
-
-function resetTranspose(){
-
-transpose=0;
-
-current.preferredTranspose=0;
-
-persist();
-
-renderSheet();
-
-}
-
-
-/* ESCOLHER TOM */
-
+function exitStage(){stopScroll();stage.classList.add("hidden");current=null}
+function changeTranspose(n){transpose=(transpose+n+12)%12;current.preferredTranspose=transpose;persist();renderSheet()}
+function resetTranspose(){transpose=0;current.preferredTranspose=0;persist();renderSheet()}
 function chooseKey(){
-
-let base=
-NOTE_INDEX[
-current.key.toUpperCase()
-] ?? 0;
-
-
-let atual=
-NOTES_SHARP[
-(base+transpose)%12
-];
-
-
-let desired=
-prompt(
-
-"Digite o tom desejado:\nC, C#, D, D#, E, F, F#, G, G#, A, A# ou B",
-
-atual
-
-);
-
-
-if(!desired)return;
-
-
-desired=
-desired
-.trim()
-.toUpperCase();
-
-
-let idx=
-NOTE_INDEX[desired];
-
-
-if(idx===undefined){
-
-return alert(
-"Tom inválido."
-);
-
+ let base=NOTE_INDEX[current.key.toUpperCase()]??0;
+ let desired=prompt("Digite o tom desejado (C, C#, D, D#, E, F, F#, G, G#, A, A# ou B):",NOTES_SHARP[(base+transpose)%12]);
+ if(!desired)return;desired=desired.trim().toUpperCase();let idx=NOTE_INDEX[desired];if(idx===undefined)return alert("Tom inválido.");transpose=(idx-base+12)%12;current.preferredTranspose=transpose;persist();renderSheet();
 }
-
-
-transpose=
-(idx-base+12)%12;
-
-
-current.preferredTranspose=
-transpose;
-
-
-persist();
-
-renderSheet();
-
-}
-
-
-/* FONTE */
-
-function fontSize(d){
-
-db.prefs.font=
-Math.max(
-
-14,
-
-Math.min(
-
-56,
-
-(db.prefs.font || 26)+d
-
-)
-
-);
-
-
-persist();
-
-
-document.documentElement
-.style.setProperty(
-
-"--fs",
-
-db.prefs.font+"px"
-
-);
-
-}
-
-
-/* VELOCIDADE */
-
+function fontSize(d){db.prefs.font=Math.max(14,Math.min(56,(db.prefs.font||26)+d));persist();document.documentElement.style.setProperty("--fs",db.prefs.font+"px")}
 function speed(d){
-
-db.prefs.speed=
-Math.max(
-
-0.1,
-
-Math.min(
-
-3,
-
-(db.prefs.speed || 0.65)+d
-
-)
-
-);
-
-
-persist();
-
+ db.prefs.speed=Math.max(.1,Math.min(3,(db.prefs.speed||.65)+d));
+ db.prefs.speed=Math.round(db.prefs.speed*10)/10;
+ persist();
+ updateSpeedDisplay();
 }
-
-
-/* ROLAGEM */
-
-function toggleScroll(){
-
-scrolling
-?
-stopScroll()
-:
-startScroll();
-
+function updateSpeedDisplay(){
+ const display=document.getElementById("speedDisplay");
+ if(display) display.textContent=(db.prefs.speed||.65).toFixed(1)+"x";
 }
+function toggleScroll(){scrolling?stopScroll():startScroll()}
+function startScroll(){scrolling=true;playBtn.textContent="⏸ Pausar";lastTime=performance.now();raf=requestAnimationFrame(scrollTick)}
+function scrollTick(t){if(!scrolling)return;let dt=t-lastTime;lastTime=t;stage.scrollTop+=(db.prefs.speed||.65)*dt/16.67;if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){stopScroll();return}raf=requestAnimationFrame(scrollTick)}
+function stopScroll(){scrolling=false;playBtn.textContent="▶ Rolar";if(raf)cancelAnimationFrame(raf)}
+function restartScroll(){stopScroll();stage.scrollTo({top:0,behavior:"smooth"})}
+function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;stage.scrollTop=0;renderSheet()}
+function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;stage.scrollTop=0;renderSheet()}
+function fullscreen(){if(!document.fullscreenElement)stage.requestFullscreen?.();else document.exitFullscreen?.()}
+function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer);hideTimer=setTimeout(()=>controls.classList.add("fade"),3500)}
+function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
+function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.songs))throw 0;db=x;db.setlist=db.setlist||[];db.prefs=db.prefs||{font:26,speed:.65};persist();render();alert("Backup importado.");}catch{alert("Arquivo de backup inválido.")}};r.readAsText(f);e.target.value=""}
 
 
-function startScroll(){
-
-scrolling=true;
-
-playBtn.textContent=
-"⏸ Pausar";
-
-lastTime=
-performance.now();
-
-raf=
-requestAnimationFrame(
-scrollTick
-);
-
+function cleanPastedChord(raw){
+ let s=String(raw||"");
+ // Normalize copied browser whitespace and markdown-like bold markers.
+ s=s.replace(/\u00A0/g," ").replace(/\u2007|\u202F/g," ");
+ s=s.replace(/\*\*(.*?)\*\*/g,"$1");
+ s=s.replace(/__([^_]+)__/g,"$1");
+ s=s.replace(/\r\n?/g,"\n");
+ // Remove trailing whitespace but preserve leading spaces used for chord positioning.
+ s=s.split("\n").map(line=>line.replace(/[ \t]+$/g,"")).join("\n");
+ // Avoid huge empty gaps.
+ s=s.replace(/\n{4,}/g,"\n\n\n");
+ return s.trim();
 }
-
-
-function scrollTick(t){
-
-if(!scrolling)return;
-
-
-let dt=
-t-lastTime;
-
-
-lastTime=t;
-
-
-stage.scrollTop+=
-
-(db.prefs.speed || .65)
-
-*
-
-dt/16.67;
-
-
-if(
-
-stage.scrollTop
-+
-stage.clientHeight
-
->=
-
-stage.scrollHeight-2
-
-){
-
-stopScroll();
-
-return;
-
+function extractDeclaredKey(text){
+ const m=String(text).match(/(?:^|\n)\s*Tom\s*:\s*([A-G](?:#|b)?)/i);
+ return m?normalizeDetectedKey(m[1]):null;
 }
-
-
-raf=
-requestAnimationFrame(
-scrollTick
-);
-
+function normalizeDetectedKey(k){
+ const idx=NOTE_INDEX[String(k).toUpperCase()];
+ return idx===undefined?null:NOTES_SHARP[idx];
 }
-
-
-function stopScroll(){
-
-scrolling=false;
-
-playBtn.textContent=
-"▶ Rolar";
-
-
-if(raf)
-cancelAnimationFrame(raf);
-
+function processPastedChord(){
+ const before=content.value;
+ const cleaned=cleanPastedChord(before);
+ content.value=cleaned;
+ const detected=extractDeclaredKey(cleaned);
+ if(detected){key.value=detected;processInfo.textContent="Tom detectado: "+detected;}
+ else processInfo.textContent="Cifra organizada. Confira o tom antes de salvar.";
 }
-
-
-function restartScroll(){
-
-stopScroll();
-
-stage.scrollTo({
-
-top:0,
-
-behavior:"smooth"
-
+document.addEventListener("keydown",e=>{
+ if(stage.classList.contains("hidden")||["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
+ if(e.code==="Space"){e.preventDefault();toggleScroll()}else if(e.key==="ArrowRight")nextSong();else if(e.key==="ArrowLeft")previousSong();else if(e.key==="ArrowUp"){e.preventDefault();speed(-.10)}else if(e.key==="ArrowDown"){e.preventDefault();speed(.10)}else if(e.key==="+")changeTranspose(1);else if(e.key==="-")changeTranspose(-1);else if(e.key==="0")resetTranspose();else if(e.key.toLowerCase()==="f")fullscreen();else if(e.key.toLowerCase()==="r")restartScroll();
 });
-
-}
-
-
-/* PRÓXIMA */
-
-function nextSong(){
-
-if(
-currentSetIndex<0
-||
-currentSetIndex>=
-db.setlist.length-1
-)return;
-
-
-stopScroll();
-
-currentSetIndex++;
-
-
-current=
-db.songs.find(
-
-s=>
-s.id===
-db.setlist[currentSetIndex]
-
-);
-
-
-transpose=
-current?.preferredTranspose || 0;
-
-
-stage.scrollTop=0;
-
-renderSheet();
-
-}
-
-
-/* ANTERIOR */
-
-function previousSong(){
-
-if(
-currentSetIndex<=0
-)return;
-
-
-stopScroll();
-
-currentSetIndex--;
-
-
-current=
-db.songs.find(
-
-s=>
-s.id===
-db.setlist[currentSetIndex]
-
-);
-
-
-transpose=
-current?.preferredTranspose || 0;
-
-
-stage.scrollTop=0;
-
-renderSheet();
-
-}
-
-
-/* TELA CHEIA */
-
-function fullscreen(){
-
-if(
-!document.fullscreenElement
-){
-
-stage.requestFullscreen?.();
-
-}else{
-
-document.exitFullscreen?.();
-
-}
-
-}
-
-
-/* ESCONDER CONTROLES */
-
-function wakeControls(){
-
-controls.classList.remove(
-"fade"
-);
-
-
-clearTimeout(
-hideTimer
-);
-
-
-hideTimer=
-setTimeout(
-()=>controls.classList.add("fade"),
-3500
-);
-
-}
-
-
-/* BACKUP */
-
-function exportBackup(){
-
-let blob=
-new Blob(
-
-[
-JSON.stringify(
-db,
-null,
-2
-)
-],
-
-{
-type:"application/json"
-}
-
-);
-
-
-let a=
-document.createElement("a");
-
-
-a.href=
-URL.createObjectURL(blob);
-
-
-a.download=
-"setcifra-backup.json";
-
-
-a.click();
-
-
-URL.revokeObjectURL(
-a.href
-);
-
-}
-
-
-/* IMPORTAR BACKUP */
-
-function importBackup(e){
-
-let f=
-e.target.files[0];
-
-
-if(!f)return;
-
-
-let r=
-new FileReader();
-
-
-r.onload=()=>{
-
-try{
-
-let x=
-JSON.parse(
-r.result
-);
-
-
-if(
-!Array.isArray(x.songs)
-)
-throw 0;
-
-
-db=x;
-
-
-db.setlist=
-db.setlist || [];
-
-
-db.prefs=
-db.prefs ||
-{
-font:26,
-speed:.65
-};
-
-
-persist();
-
-render();
-
-alert(
-"Backup restaurado."
-);
-
-
-}catch{
-
-alert(
-"Arquivo de backup inválido."
-);
-
-}
-
-};
-
-
-r.readAsText(f);
-
-e.target.value="";
-
-}
-
-
-/* ATALHOS */
-
-document.addEventListener(
-"keydown",
-e=>{
-
-if(
-stage.classList.contains("hidden")
-)
-return;
-
-
-if(
-["INPUT","TEXTAREA","SELECT"]
-.includes(
-document.activeElement.tagName
-)
-)
-return;
-
-
-if(
-e.code==="Space"
-){
-
-e.preventDefault();
-
-toggleScroll();
-
-}
-
-
-else if(
-e.key==="ArrowRight"
-){
-
-nextSong();
-
-}
-
-
-else if(
-e.key==="ArrowLeft"
-){
-
-previousSong();
-
-}
-
-
-else if(
-e.key==="ArrowUp"
-){
-
-e.preventDefault();
-
-speed(-.15);
-
-}
-
-
-else if(
-e.key==="ArrowDown"
-){
-
-e.preventDefault();
-
-speed(.15);
-
-}
-
-
-else if(
-e.key==="+"
-){
-
-changeTranspose(1);
-
-}
-
-
-else if(
-e.key==="-"
-){
-
-changeTranspose(-1);
-
-}
-
-
-else if(
-e.key==="0"
-){
-
-resetTranspose();
-
-}
-
-
-else if(
-e.key.toLowerCase()==="f"
-){
-
-fullscreen();
-
-}
-
-
-else if(
-e.key.toLowerCase()==="r"
-){
-
-restartScroll();
-
-}
-
-});
-
-
-/* MÚSICA DEMO */
-
-if(
-!db.songs.length
-){
-
-db.songs=[
-
-{
-
-id:uid(),
-
-title:
-"Canção de Exemplo",
-
-artist:
-"Demonstração",
-
-key:"G",
-
-duration:"03:20",
-
-preferredTranspose:0,
-
-content:
-`Tom: G
-
-[Intro] G  D  Em  C
-
-G              D
+if(!db.songs.length){
+ db.songs=[
+ {id:uid(),title:"Canção de Exemplo",artist:"Demonstração",key:"G",duration:"03:20",preferredTranspose:0,content:`G              D
 Esta é uma linha de demonstração
 Em             C
-Cole sua cifra aqui
+Use sua própria letra autorizada aqui
 
 G              D
-A rolagem acompanha a apresentação
+A rolagem acompanha sua apresentação
 Em              C
-E você pode mudar o tom`
+E o tom pode mudar sem alterar a letra`},
+ {id:uid(),title:"Teste de Transposição",artist:"SetCifra",key:"C",duration:"02:50",preferredTranspose:0,content:`C       G/B       Am
+Linha para testar os acordes
+F       C/E       Dm7   G7
+Incluindo inversões e extensões
 
+Cmaj7   Am7       Dm7   G7
+Experimente os botões de tom`}
+ ];persist();
 }
-
-];
-
-
-persist();
-
-}
-
-
 render();
-
 </script>
-
 </body>
 </html>
