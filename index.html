@@ -29,8 +29,7 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
       <button class="btn" onclick="exportBackup()">Exportar</button>
       <button class="btn" onclick="document.getElementById('importFile').click()">Importar</button>
       <input id="importFile" type="file" accept=".json" class="hidden" onchange="importBackup(event)">
-      <button class="btn" onclick="openOnlineSearch()">Buscar online</button>
-      <button class="btn primary" onclick="openEditor()">+ Música</button>
+      <button class="btn primary" onclick="openEditor()">+ Colar cifra</button>
     </div>
   </div>
   <input id="search" class="search" placeholder="Buscar música ou artista..." oninput="render()">
@@ -45,36 +44,9 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
 </div>
 
 
-<div id="onlineSearch" class="modal hidden">
- <div class="modalbox">
-  <div class="row" style="justify-content:space-between;align-items:center">
-   <div><h2 style="margin:0">Buscar cifra online</h2><div class="muted" style="margin-top:4px">Informe artista e música.</div></div>
-   <button class="btn" onclick="closeOnlineSearch()">Fechar</button>
-  </div>
-  <div class="grid">
-   <div class="field"><label>Artista</label><input id="onlineArtist" placeholder="Ex.: coldplay"></div>
-   <div class="field"><label>Música</label><input id="onlineSong" placeholder="Ex.: the scientist"></div>
-  </div>
-  <div class="row">
-   <button id="onlineSearchBtn" class="btn primary" onclick="searchOnline()">Buscar cifra</button>
-  </div>
-  <div id="onlineStatus" class="muted" style="margin:14px 0"></div>
-  <div id="onlineResult" class="hidden">
-   <div class="card">
-    <h2 id="onlineResultTitle"></h2>
-    <div id="onlineResultMeta" class="muted" style="margin-bottom:10px"></div>
-    <div id="onlinePreview" style="white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;max-height:360px;overflow:auto;background:#0e0e11;border:1px solid var(--border);border-radius:10px;padding:12px"></div>
-    <div class="row" style="margin-top:12px">
-     <button class="btn primary" onclick="saveOnlineSong()">Adicionar à biblioteca</button>
-    </div>
-   </div>
-  </div>
- </div>
-</div>
-
 <div id="editor" class="modal hidden">
  <div class="modalbox">
-  <div class="row" style="justify-content:space-between"><h2 id="editorTitle">Adicionar música</h2><button class="btn" onclick="closeEditor()">Fechar</button></div>
+  <div class="row" style="justify-content:space-between"><h2 id="editorTitle">Colar cifra</h2><button class="btn" onclick="closeEditor()">Fechar</button></div>
   <input type="hidden" id="songId">
   <div class="grid">
    <div class="field"><label>Música</label><input id="title"></div>
@@ -84,7 +56,14 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
    <div class="field"><label>Tom original</label><select id="key"></select></div>
    <div class="field"><label>Duração (mm:ss)</label><input id="duration" placeholder="03:40"></div>
   </div>
-  <div class="field"><label>Cifra + letra</label><textarea id="content" placeholder="Cole aqui sua cifra autorizada ou própria..."></textarea></div>
+  <div class="field">
+<label>Cole a cifra exatamente como foi copiada do navegador</label>
+<textarea id="content" placeholder="Ex.: **Tom: C**&#10;&#10;[Intro] **G9** **F** **G9** **F**&#10;&#10;**C9** **G** **F9**&#10;Trecho da letra..."></textarea>
+<div class="row" style="margin-top:8px">
+<button class="btn" type="button" onclick="processPastedChord()">Limpar e organizar</button>
+<span id="processInfo" class="muted" style="align-self:center"></span>
+</div>
+</div>
   <div class="row"><button class="btn primary" onclick="saveSong()">Salvar música</button><button class="btn danger" id="deleteBtn" onclick="deleteCurrent()">Excluir</button></div>
  </div>
 </div>
@@ -130,11 +109,14 @@ function render(){
 }
 function openEditor(id=""){
  let s=db.songs.find(x=>x.id===id);
- editor.classList.remove("hidden"); songId.value=s?.id||""; title.value=s?.title||""; artist.value=s?.artist||""; key.value=s?.key||"C"; duration.value=s?.duration||""; content.value=s?.content||""; editorTitle.textContent=s?"Editar música":"Adicionar música"; deleteBtn.classList.toggle("hidden",!s);
+ editor.classList.remove("hidden"); songId.value=s?.id||""; title.value=s?.title||""; artist.value=s?.artist||""; key.value=s?.key||"C"; duration.value=s?.duration||""; content.value=s?.content||""; editorTitle.textContent=s?"Editar música":"Colar cifra"; deleteBtn.classList.toggle("hidden",!s);
 }
 function closeEditor(){editor.classList.add("hidden")}
 function saveSong(){
  if(!title.value.trim()||!content.value.trim())return alert("Informe o nome e a cifra/letra.");
+ content.value=cleanPastedChord(content.value);
+ const detectedKey=extractDeclaredKey(content.value);
+ if(detectedKey) key.value=detectedKey;
  let id=songId.value||uid(), old=db.songs.find(x=>x.id===id);
  let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0};
  if(old)Object.assign(old,s);else db.songs.push(s);persist();closeEditor();render();
@@ -199,82 +181,36 @@ function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
 function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.songs))throw 0;db=x;db.setlist=db.setlist||[];db.prefs=db.prefs||{font:26,speed:.65};persist();render();alert("Backup importado.");}catch{alert("Arquivo de backup inválido.")}};r.readAsText(f);e.target.value=""}
 
-let onlineFound=null;
-function openOnlineSearch(){
- onlineSearch.classList.remove("hidden");
- onlineStatus.textContent="";
- onlineResult.classList.add("hidden");
- onlineFound=null;
- setTimeout(()=>onlineArtist.focus(),50);
-}
-function closeOnlineSearch(){onlineSearch.classList.add("hidden")}
-function slugQuery(v){return v.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
-async function searchOnline(){
- const artist=onlineArtist.value.trim(), song=onlineSong.value.trim();
- if(!artist||!song)return alert("Informe o artista e o nome da música.");
- onlineSearchBtn.disabled=true; onlineSearchBtn.textContent="Buscando...";
- onlineStatus.textContent="Consultando a fonte online...";
- onlineResult.classList.add("hidden"); onlineFound=null;
- try{
-   const url=`https://cifraclub-api.vercel.app/api/cifra?artist=${encodeURIComponent(slugQuery(artist))}&song=${encodeURIComponent(slugQuery(song))}`;
-   const res=await fetch(url,{headers:{"Accept":"application/json"}});
-   if(!res.ok)throw new Error("HTTP "+res.status);
-   const data=await res.json();
-   const cifra=Array.isArray(data.cifra)?data.cifra.join("\n"):String(data.cifra||"");
-   if(!cifra.trim())throw new Error("Cifra vazia");
-   onlineFound={
-     title:data.name||song,
-     artist:data.artist||artist,
-     content:cifra,
-     sourceUrl:data.cifraclub_url||"",
-     key:detectKey(cifra)||"C"
-   };
-   onlineResultTitle.textContent=onlineFound.title;
-   onlineResultMeta.textContent=(onlineFound.artist||"")+" · Tom detectado: "+onlineFound.key;
-   onlinePreview.textContent=onlineFound.content;
-   onlineResult.classList.remove("hidden");
-   onlineStatus.textContent="Cifra encontrada.";
- }catch(err){
-   onlineStatus.textContent="Não foi possível buscar essa cifra. A API não oficial pode estar indisponível, ter bloqueado a requisição do navegador ou não ter encontrado a música. Você ainda pode adicionar a cifra manualmente.";
- }finally{
-   onlineSearchBtn.disabled=false; onlineSearchBtn.textContent="Buscar cifra";
- }
-}
-function detectKey(cifra){
- const lines=cifra.split("\n").slice(0,35);
- for(const line of lines){
-   const m=line.match(/\bTom:\s*([A-G](?:#|b)?)/i);
-   if(m)return normalizeKey(m[1]);
- }
- for(const line of lines){
-   if(isChordLine(line)){
-     const m=line.match(/(?:^|\s)([A-G](?:#|b)?)(?=[mM0-9/(\s]|$)/);
-     if(m)return normalizeKey(m[1]);
-   }
- }
- return null;
-}
-function normalizeKey(k){
- const idx=NOTE_INDEX[String(k).toUpperCase()];
- return idx===undefined?"C":NOTES_SHARP[idx];
-}
-function saveOnlineSong(){
- if(!onlineFound)return;
- const existing=db.songs.find(s=>s.title.toLowerCase()===onlineFound.title.toLowerCase() && s.artist.toLowerCase()===onlineFound.artist.toLowerCase());
- if(existing && !confirm("Essa música já parece estar na biblioteca. Adicionar outra cópia?"))return;
- db.songs.push({
-   id:uid(),
-   title:onlineFound.title,
-   artist:onlineFound.artist,
-   key:onlineFound.key,
-   duration:"",
-   content:onlineFound.content,
-   preferredTranspose:0,
-   sourceUrl:onlineFound.sourceUrl
- });
- persist();render();closeOnlineSearch();alert("Música adicionada à biblioteca.");
-}
 
+function cleanPastedChord(raw){
+ let s=String(raw||"");
+ // Normalize copied browser whitespace and markdown-like bold markers.
+ s=s.replace(/\u00A0/g," ").replace(/\u2007|\u202F/g," ");
+ s=s.replace(/\*\*(.*?)\*\*/g,"$1");
+ s=s.replace(/__([^_]+)__/g,"$1");
+ s=s.replace(/\r\n?/g,"\n");
+ // Remove trailing whitespace but preserve leading spaces used for chord positioning.
+ s=s.split("\n").map(line=>line.replace(/[ \t]+$/g,"")).join("\n");
+ // Avoid huge empty gaps.
+ s=s.replace(/\n{4,}/g,"\n\n\n");
+ return s.trim();
+}
+function extractDeclaredKey(text){
+ const m=String(text).match(/(?:^|\n)\s*Tom\s*:\s*([A-G](?:#|b)?)/i);
+ return m?normalizeDetectedKey(m[1]):null;
+}
+function normalizeDetectedKey(k){
+ const idx=NOTE_INDEX[String(k).toUpperCase()];
+ return idx===undefined?null:NOTES_SHARP[idx];
+}
+function processPastedChord(){
+ const before=content.value;
+ const cleaned=cleanPastedChord(before);
+ content.value=cleaned;
+ const detected=extractDeclaredKey(cleaned);
+ if(detected){key.value=detected;processInfo.textContent="Tom detectado: "+detected;}
+ else processInfo.textContent="Cifra organizada. Confira o tom antes de salvar.";
+}
 document.addEventListener("keydown",e=>{
  if(stage.classList.contains("hidden")||["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
  if(e.code==="Space"){e.preventDefault();toggleScroll()}else if(e.key==="ArrowRight")nextSong();else if(e.key==="ArrowLeft")previousSong();else if(e.key==="ArrowUp"){e.preventDefault();speed(-.15)}else if(e.key==="ArrowDown"){e.preventDefault();speed(.15)}else if(e.key==="+")changeTranspose(1);else if(e.key==="-")changeTranspose(-1);else if(e.key==="0")resetTranspose();else if(e.key.toLowerCase()==="f")fullscreen();else if(e.key.toLowerCase()==="r")restartScroll();
