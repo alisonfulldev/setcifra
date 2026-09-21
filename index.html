@@ -21,25 +21,30 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
 .stageHeader{flex:0 0 auto;background:#050505;border-bottom:1px solid #222;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .stageTitle{min-width:0;display:flex;align-items:baseline;gap:10px}.stageTitle b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px}.stageTitle small{color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stageHeader .btn{padding:6px 11px}
-.stageBody{flex:1 1 auto;min-height:0;overflow:hidden;width:100%;max-width:1150px;margin:0 auto;padding:10px 26px 6px}
+.stageBody{flex:1 1 auto;min-height:0;overflow:hidden;width:100%;padding:10px 22px 6px}
+.chordSheet.measuring{display:inline-block;white-space:pre;width:auto}
+.chordSheet.paged{display:grid;justify-content:center;align-items:start}
+.pageCol{position:relative;min-width:0}
+.pageCol+.pageCol::before{content:"";position:absolute;top:0;bottom:0;left:calc(var(--gap,32px) / -2);width:1px;background:#262626}
+.pageCol:empty::before{display:none}
 .chordSheet{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs);line-height:1.25;white-space:pre-wrap;word-break:normal;margin:0;padding:0}
 .chordLine{color:var(--accent);font-weight:800;min-height:1em}.lyricLine{color:#fff;min-height:1em}.plainLine{color:#ddd;min-height:1em}
 .chordSheet.turn{animation:pageTurn .14s ease-out}
 @keyframes pageTurn{from{opacity:.35}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.chordSheet.turn{animation:none}}
-.controls{flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center;background:#0e0e11;border-top:1px solid #262626;padding:6px 10px;transition:opacity .25s}
+.controls{flex:0 0 auto;display:flex;gap:5px;flex-wrap:wrap;justify-content:center;align-items:center;background:#0e0e11;border-top:1px solid #262626;padding:6px 10px;transition:opacity .25s}
 .controls.fade{opacity:.18}.controls:hover,.controls:focus-within{opacity:1}
-.controls .btn{padding:7px 11px;font-size:14px}
-.navGroup{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
-.controls .pageBtn{padding:8px 16px;font-size:15px;font-weight:800}
-.pageInfo{min-width:74px;text-align:center;font-weight:900;color:var(--accent);font-size:17px;font-variant-numeric:tabular-nums}
+.controls .btn{padding:6px 9px;font-size:13px}
+.navGroup{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:center}
+.controls .pageBtn{padding:7px 15px;font-size:15px;font-weight:800}
+.pageInfo{min-width:64px;text-align:center;font-weight:900;color:var(--accent);font-size:17px;font-variant-numeric:tabular-nums}
 .fontInfo{min-width:40px;text-align:center;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
-.sep{width:1px;height:26px;background:#333;margin:0 4px}
+.sep{width:1px;height:24px;background:#333;margin:0 2px}
 .pagePill{color:var(--accent);border:1px solid #4a4214;padding:4px 10px;border-radius:999px;font-weight:800;font-variant-numeric:tabular-nums}
 
 .pill{color:#111;background:var(--accent);padding:6px 10px;border-radius:999px;font-weight:900}.muted{color:var(--muted)}.empty{padding:25px;text-align:center;color:var(--muted)}
 .setlistItem{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding:9px 0}.setlistItem:last-child{border:0}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.app{padding:12px}.stageBody{padding:8px 12px 4px}.chordSheet{font-size:var(--fs)}.stageHeader{flex-wrap:wrap}.sep{display:none}}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.app{padding:12px}.stageBody{padding:8px 10px 4px}.chordSheet{font-size:var(--fs)}.stageHeader{flex-wrap:wrap}.sep{display:none}}
 </style>
 </head>
 <body>
@@ -108,13 +113,15 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
    <button class="btn" onclick="changeTranspose(-1)" title="Baixar meio tom (-)">Tom −</button>
    <button class="btn" onclick="resetTranspose()" title="Voltar ao tom original (0)">Original</button>
    <button class="btn" onclick="changeTranspose(1)" title="Subir meio tom (+)">Tom +</button>
-   <button class="btn" onclick="chooseKey()" title="Digitar o tom desejado">Escolher tom</button>
+   <button class="btn" onclick="chooseKey()" title="Digitar o tom desejado">Tom…</button>
   </div>
   <span class="sep"></span>
   <div class="navGroup">
    <button class="btn" onclick="fontSize(-1)" title="Diminuir fonte">A−</button>
    <span id="fontInfo" class="fontInfo">16px</span>
    <button class="btn" onclick="fontSize(1)" title="Aumentar fonte">A+</button>
+   <button class="btn" onclick="fitFont()" title="Aumenta a fonte o máximo possível sem criar mais páginas">Ajustar</button>
+   <button class="btn" id="colsBtn" onclick="cycleColumns()" title="Quantidade de colunas por página (C)">Col: Auto</button>
    <button class="btn" onclick="firstPage()" title="Voltar para a página 1 (R)">↺ Pág. 1</button>
    <button class="btn" onclick="fullscreen()" title="Tela cheia (F)">Tela cheia</button>
   </div>
@@ -221,68 +228,117 @@ function buildUnits(lines){
  return merged;
 }
 
-// Mede a altura real de cada linha usando a própria área da página (mesma largura e fonte)
-function measureUnits(units){
- const all=units.flatMap(u=>u.lines);
- sheet.innerHTML=all.map(lineHtml).join("");
+// Área útil da página no palco
+function stageMetrics(){
+ const body=document.getElementById("stageBody");
+ const cs=getComputedStyle(body);
+ return {
+  h:Math.max(40,body.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-2),
+  w:Math.max(100,body.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-2)
+ };
+}
+// Renderiza as linhas temporariamente só para medir (width 0 = sem quebra de linha)
+function renderMeasure(lines,width){
+ sheet.className=width?"chordSheet":"chordSheet measuring";
+ sheet.style.width=width?width+"px":"";
+ sheet.style.gridTemplateColumns="";
+ sheet.innerHTML=lines.map(lineHtml).join("");
+}
+function measureHeights(all,units){
  const els=sheet.children;
  all.forEach((l,idx)=>{l.h=els[idx]?els[idx].getBoundingClientRect().height:0});
  units.forEach(u=>{u.h=u.lines.reduce((t,l)=>t+l.h,0)});
 }
 
-function availableHeight(){
- const body=document.getElementById("stageBody");
- const cs=getComputedStyle(body);
- return Math.max(40,body.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-2);
-}
-
-// Divide a música em páginas conforme o espaço disponível na tela
-function paginate(){
- const lines=stageLines();
- let units=buildUnits(lines);
- measureUnits(units);
- const avail=availableHeight();
- // Se um bloco sozinho for maior que a página (fonte muito grande), ele é dividido linha a linha
- units=units.flatMap(u=>u.h>avail&&u.lines.length>1?u.lines.map(l=>({lines:[l],h:l.h,blank:l.blank})):[u]);
-
+// Distribui os blocos em colunas da altura da tela, preferindo quebrar no fim de estrofes/seções
+function packColumns(units,avail){
  const sum=a=>a.reduce((t,x)=>t+x.h,0);
  const result=[];
- const pushPage=p=>{p=p.slice();while(p.length&&p[p.length-1].blank)p.pop();if(p.length)result.push(p)};
- let page=[],h=0;
+ const pushCol=p=>{p=p.slice();while(p.length&&p[p.length-1].blank)p.pop();if(p.length)result.push(p)};
+ let col=[],h=0;
  for(let k=0;k<units.length;k++){
   const u=units[k];
-  if(!page.length&&u.blank)continue; // não começa página com linha vazia
-  if(!page.length||h+u.h<=avail){page.push(u);h+=u.h;continue}
-  // Não coube: tenta terminar a página no fim de uma estrofe/seção,
-  // desde que a página já esteja pelo menos 60% cheia.
+  if(!col.length&&u.blank)continue; // não começa coluna com linha vazia
+  if(!col.length||h+u.h<=avail){col.push(u);h+=u.h;continue}
   let cut=-1,acc=0;
-  for(let j=0;j<page.length-1;j++){
-   acc+=page[j].h;
-   const breakHere=page[j].blank||page[j+1].sectionStart;
+  for(let j=0;j<col.length-1;j++){
+   acc+=col[j].h;
+   const breakHere=col[j].blank||col[j+1].sectionStart;
    if(breakHere&&acc>=avail*0.6)cut=j;
   }
   let rest=null;
   if(cut>=0){
-   rest=page.slice(cut+1);
+   rest=col.slice(cut+1);
    while(rest.length&&rest[0].blank)rest.shift();
    if(sum(rest)+u.h>avail)rest=null;
   }
-  if(rest){pushPage(page.slice(0,cut+1));page=rest}
-  else{pushPage(page);page=[]}
-  h=sum(page);
-  k--; // tenta colocar o bloco atual novamente na nova página
+  if(rest){pushCol(col.slice(0,cut+1));col=rest}
+  else{pushCol(col);col=[]}
+  h=sum(col);
+  k--; // tenta colocar o bloco atual novamente
  }
- pushPage(page);
- if(!result.length)result.push([{lines:[{i:0,text:"",cls:"plainLine",h:0}],h:0}]);
+ pushCol(col);
  return result;
 }
 
-function pageStartLine(){return pages[currentPage]?.[0]?.lines?.[0]?.i??0}
+function getColsPref(){const v=db.prefs?.stageColumns;return [1,2,3,4].includes(v)?v:"auto"}
+let layout={cols:1,colW:0,gap:0};
+
+// Divide a música em páginas. Cada página pode ter várias colunas lado a lado,
+// aproveitando toda a largura do notebook (como uma folha de pasta de cifras).
+function paginate(){
+ const lines=stageLines();
+ let units=buildUnits(lines);
+ const all=units.flatMap(u=>u.lines);
+ const m=stageMetrics();
+ const fs=current.fontSize??FONT_DEFAULT;
+ const minGap=Math.max(20,Math.round(fs*1.6));
+
+ // 1ª medição: sem quebra de linha -> largura da linha mais longa e altura total
+ renderMeasure(all,0);
+ const maxW=Math.ceil(sheet.getBoundingClientRect().width)+2;
+ measureHeights(all,units);
+ const totalH=units.reduce((t,u)=>t+u.h,0);
+
+ // Quantas colunas cabem na largura sem quebrar as linhas da cifra
+ const fit=Math.max(1,Math.min(4,Math.floor((m.w+minGap)/(maxW+minGap))));
+ const pref=getColsPref();
+ const cols=pref==="auto"?(totalH<=m.h?1:fit):pref;
+ const colW=Math.max(60,Math.floor(Math.min(maxW,(m.w-minGap*(cols-1))/cols)));
+
+ // 2ª medição: com a largura real da coluna
+ renderMeasure(all,colW);
+ measureHeights(all,units);
+ sheet.style.width="";
+
+ // Bloco maior que a altura da página (fonte muito grande) é dividido linha a linha
+ units=units.flatMap(u=>u.h>m.h&&u.lines.length>1?u.lines.map(l=>({lines:[l],h:l.h,blank:l.blank})):[u]);
+
+ const columns=packColumns(units,m.h);
+ const result=[];
+ for(let i=0;i<columns.length;i+=cols)result.push(columns.slice(i,i+cols));
+ if(!result.length)result.push([[{lines:[{i:0,text:"",cls:"plainLine",h:0}],h:0}]]);
+
+ const n=result.length===1?Math.max(1,result[0].length):cols;
+ const gap=n>1?Math.max(minGap,Math.min((m.w-n*colW)/(n-1),minGap*4)):0;
+ layout={cols:n,colW,gap:Math.floor(gap)};
+ return result;
+}
+
+function pageLines(p){return p.flat().flatMap(u=>u.lines)}
+function pageStartLine(){return pages[currentPage]?.[0]?.[0]?.lines?.[0]?.i??0}
 
 function showPage(animate){
  if(!pages.length)return;
  currentPage=Math.max(0,Math.min(currentPage,pages.length-1));
- sheet.innerHTML=pages[currentPage].flatMap(u=>u.lines).map(lineHtml).join("");
+ const cols=pages[currentPage].slice();
+ while(cols.length<layout.cols)cols.push([]);
+ sheet.className="chordSheet paged";
+ sheet.style.width="";
+ sheet.style.gridTemplateColumns=`repeat(${layout.cols},${layout.colW}px)`;
+ sheet.style.columnGap=layout.gap+"px";
+ sheet.style.setProperty("--gap",layout.gap+"px");
+ sheet.innerHTML=cols.map(c=>`<div class="pageCol">${c.flatMap(u=>u.lines).map(lineHtml).join("")}</div>`).join("");
  const label=`${currentPage+1} / ${pages.length}`;
  document.getElementById("pageInfo").textContent=label;
  document.getElementById("pagePill").textContent="Pág. "+label;
@@ -300,11 +356,39 @@ function renderSheet(keepLine){
  stageCount.textContent=currentSetIndex>=0?`Música ${currentSetIndex+1} / ${db.setlist.length}`:"";
  document.getElementById("fontInfo").textContent=(current.fontSize??FONT_DEFAULT)+"px";
  pages=paginate();
+ const pref=getColsPref();
+ document.getElementById("colsBtn").textContent=pref==="auto"?`Col: Auto (${layout.cols})`:`Col: ${pref}`;
  if(keepLine!=null){
-  let idx=pages.findIndex(p=>{const ls=p.flatMap(u=>u.lines);return ls[ls.length-1].i>=keepLine});
+  let idx=pages.findIndex(p=>{const ls=pageLines(p);return ls.length&&ls[ls.length-1].i>=keepLine});
   currentPage=idx<0?pages.length-1:idx;
  }
  showPage(false);
+}
+
+// Alterna a quantidade de colunas: Auto -> 1 -> 2 -> 3 -> Auto (preferência geral, salva no LocalStorage)
+function cycleColumns(){
+ if(!current)return;
+ const order=["auto",1,2,3];
+ const keep=pageStartLine();
+ const next=order[(order.indexOf(getColsPref())+1)%order.length];
+ db.prefs=db.prefs||{};
+ db.prefs.stageColumns=next;
+ persist();
+ renderSheet(keep);
+}
+// Escolhe a maior fonte possível sem aumentar o número de páginas (em relação a 16px)
+function fitFont(){
+ if(!current)return;
+ const keep=pageStartLine();
+ current.fontSize=FONT_DEFAULT;applyFont();
+ const target=paginate().length;
+ let best=FONT_DEFAULT;
+ for(let f=FONT_MAX;f>FONT_DEFAULT;f--){
+  current.fontSize=f;applyFont();
+  if(paginate().length<=target){best=f;break}
+ }
+ current.fontSize=best;persist();applyFont();
+ renderSheet(keep);
 }
 
 function nextPage(){if(!current)return;if(currentPage<pages.length-1){currentPage++;showPage(true)}}
@@ -424,7 +508,7 @@ function processPastedChord(){
    PageDown / ↓ / Espaço = próxima página
    PageUp / ↑ / Shift+Espaço = página anterior
    → = próxima música | ← = música anterior
-   F = tela cheia | R ou Home = página 1 | End = última página
+   F = tela cheia | R ou Home = página 1 | End = última página | C = colunas
    + / - = transpor | 0 = tom original */
 document.addEventListener("keydown",e=>{
  if(stage.classList.contains("hidden")||["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
@@ -441,6 +525,7 @@ document.addEventListener("keydown",e=>{
  else if(k==="0")resetTranspose();
  else if(k.toLowerCase()==="f"){e.preventDefault();fullscreen()}
  else if(k.toLowerCase()==="r"){e.preventDefault();firstPage()}
+ else if(k.toLowerCase()==="c"){e.preventDefault();cycleColumns()}
 });
 if(!db.songs.length){
  db.songs=[
