@@ -71,11 +71,11 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
 <div id="stage" class="stage hidden" onmousemove="wakeControls()" ontouchstart="wakeControls()">
  <div class="stageHeader">
   <div class="stageTitle"><b id="stageName"></b><small id="stageArtist"></small></div>
-  <div class="row" style="align-items:center"><span id="stageCount" class="muted"></span><span id="keyPill" class="pill"></span><button class="btn" onclick="exitStage()">Sair</button></div>
+  <div class="row" style="align-items:center"><span id="stageCount" class="muted"></span><span id="keyPill" class="pill"></span><button class="btn" id="headerPreviousBtn" onclick="previousSong()">← Anterior</button><button class="btn" onclick="exitStage()">Sair</button></div>
  </div>
  <div class="stageBody"><div id="sheet" class="chordSheet"></div></div>
  <div id="controls" class="controls">
-  <button class="btn" id="previousSongBtn" onclick="previousSong()">← Música anterior</button>
+  <button class="btn" id="previousSongBtn" onclick="previousSong()">← Anterior</button>
   <button class="btn" onclick="changeTranspose(-1)">Tom −</button>
   <button class="btn" onclick="resetTranspose()">Original</button>
   <button class="btn" onclick="chooseKey()">Tom +</button>
