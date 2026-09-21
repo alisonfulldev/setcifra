@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,15 +10,36 @@
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
 button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padding:18px}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}.brand{font-weight:900;font-size:24px}.brand span{color:var(--accent)}
 .actions,.row{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer}.btn:hover{border-color:#555}.primary{background:var(--accent);color:#111;border-color:var(--accent);font-weight:800}.danger{color:#fecaca;border-color:#7f1d1d}
+.btn:disabled{opacity:.3;cursor:default}.btn:disabled:hover{border-color:var(--border)}.btn.primary:disabled:hover{border-color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .search{width:100%;padding:16px;border-radius:14px;border:1px solid var(--border);background:var(--panel);color:white;font-size:18px;outline:none}.search:focus{border-color:var(--accent)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px}.card h2{margin:0 0 12px;font-size:17px}.song{padding:12px;border:1px solid var(--border);border-radius:10px;margin:8px 0;cursor:pointer}.song:hover{border-color:var(--accent)}.song small{color:var(--muted)}
 .hidden{display:none!important}.modal{position:fixed;inset:0;background:#000b;z-index:30;display:grid;place-items:center;padding:16px}.modalbox{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px}.field{margin:10px 0}.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:11px;border-radius:9px;border:1px solid var(--border);background:#0e0e11;color:white}.field textarea{min-height:320px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
-.stage{position:fixed;inset:0;background:#050505;z-index:20;overflow:auto}.stageHeader{position:sticky;top:0;z-index:4;background:#050505eF;backdrop-filter:blur(8px);border-bottom:1px solid #222;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}.stageTitle{min-width:0}.stageTitle b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stageTitle small{color:#aaa}
-.stageBody{max-width:1050px;margin:auto;padding:18px 28px 30vh}.chordSheet{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs);line-height:1.28;white-space:pre-wrap;word-break:normal}.chordLine{color:var(--accent);font-weight:800;min-height:1em}.lyricLine{color:#fff;min-height:1em}.plainLine{color:#ddd;min-height:1em}
-.controls{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:7px;flex-wrap:wrap;justify-content:center;width:min(980px,95%);background:#111e;border:1px solid #333;padding:9px;border-radius:14px;transition:.25s}.controls.fade{opacity:.08}.controls:hover{opacity:1}.controls .btn{padding:9px 11px}
+
+/* ===== MODO PALCO (paginado, sem rolagem) ===== */
+.stage{position:fixed;inset:0;background:#050505;z-index:20;overflow:hidden;display:flex;flex-direction:column}
+.stageHeader{flex:0 0 auto;background:#050505;border-bottom:1px solid #222;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stageTitle{min-width:0;display:flex;align-items:baseline;gap:10px}.stageTitle b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px}.stageTitle small{color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stageHeader .btn{padding:6px 11px}
+.stageBody{flex:1 1 auto;min-height:0;overflow:hidden;width:100%;max-width:1150px;margin:0 auto;padding:10px 26px 6px}
+.chordSheet{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs);line-height:1.25;white-space:pre-wrap;word-break:normal;margin:0;padding:0}
+.chordLine{color:var(--accent);font-weight:800;min-height:1em}.lyricLine{color:#fff;min-height:1em}.plainLine{color:#ddd;min-height:1em}
+.chordSheet.turn{animation:pageTurn .14s ease-out}
+@keyframes pageTurn{from{opacity:.35}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.chordSheet.turn{animation:none}}
+.controls{flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center;background:#0e0e11;border-top:1px solid #262626;padding:6px 10px;transition:opacity .25s}
+.controls.fade{opacity:.18}.controls:hover,.controls:focus-within{opacity:1}
+.controls .btn{padding:7px 11px;font-size:14px}
+.navGroup{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+.controls .pageBtn{padding:8px 16px;font-size:15px;font-weight:800}
+.pageInfo{min-width:74px;text-align:center;font-weight:900;color:var(--accent);font-size:17px;font-variant-numeric:tabular-nums}
+.fontInfo{min-width:40px;text-align:center;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.sep{width:1px;height:26px;background:#333;margin:0 4px}
+.pagePill{color:var(--accent);border:1px solid #4a4214;padding:4px 10px;border-radius:999px;font-weight:800;font-variant-numeric:tabular-nums}
+
 .pill{color:#111;background:var(--accent);padding:6px 10px;border-radius:999px;font-weight:900}.muted{color:var(--muted)}.empty{padding:25px;text-align:center;color:var(--muted)}
 .setlistItem{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding:9px 0}.setlistItem:last-child{border:0}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.app{padding:12px}.stageBody{padding:24px 14px 45vh}.chordSheet{font-size:var(--fs)}.stageHeader{align-items:flex-start}.controls{bottom:6px}}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.app{padding:12px}.stageBody{padding:8px 12px 4px}.chordSheet{font-size:var(--fs)}.stageHeader{flex-wrap:wrap}.sep{display:none}}
 </style>
 </head>
 <body>
@@ -72,28 +92,32 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
 <div id="stage" class="stage hidden" onmousemove="wakeControls()" ontouchstart="wakeControls()">
  <div class="stageHeader">
   <div class="stageTitle"><b id="stageName"></b><small id="stageArtist"></small></div>
-  <div class="row" style="align-items:center"><span id="stageCount" class="muted"></span><span id="keyPill" class="pill"></span><button class="btn" id="headerPreviousBtn" onclick="previousSong()">← Anterior</button><button class="btn" onclick="exitStage()">Sair</button></div>
+  <div class="row" style="align-items:center"><span id="stageCount" class="muted"></span><span id="pagePill" class="pagePill"></span><span id="keyPill" class="pill"></span><button class="btn" onclick="exitStage()">Sair</button></div>
  </div>
- <div class="stageBody"><div id="sheet" class="chordSheet"></div></div>
+ <div class="stageBody" id="stageBody"><div id="sheet" class="chordSheet"></div></div>
  <div id="controls" class="controls">
-  <button class="btn" id="previousSongBtn" onclick="previousSong()">← Anterior</button>
-  <button class="btn" onclick="changeTranspose(-1)">Tom −</button>
-  <button class="btn" onclick="resetTranspose()">Original</button>
-  <button class="btn" onclick="chooseKey()">Tom +</button>
-  <button class="btn" onclick="fontSize(-2)">A−</button>
-  <button class="btn" onclick="toggleScroll()" id="playBtn">▶ Rolar</button>
-  <button class="btn" onclick="restartScroll()">↺</button>
-  <div style="display:flex;align-items:center;gap:7px;min-width:260px">
-  <button class="btn" onclick="speed(-1)" title="Diminuir velocidade">−</button>
-  <input id="speedRange" type="range" min="1" max="120" step="1" value="12"
-    oninput="setSpeed(Number(this.value))"
-    style="width:130px;accent-color:var(--accent)" aria-label="Velocidade da rolagem">
-  <span id="speedDisplay" style="min-width:62px;text-align:center;font-weight:800;color:var(--accent)">12 px/s</span>
-  <button class="btn" onclick="speed(1)" title="Aumentar velocidade">+</button>
+  <div class="navGroup">
+   <button class="btn" id="previousSongBtn" onclick="previousSong()" title="Música anterior (seta ←)">← Música</button>
+   <button class="btn pageBtn" id="prevPageBtn" onclick="prevPage()" title="Página anterior (PageUp / seta ↑)">← Página</button>
+   <span id="pageInfo" class="pageInfo" title="Página atual / total de páginas">1 / 1</span>
+   <button class="btn pageBtn primary" id="nextPageBtn" onclick="nextPage()" title="Próxima página (PageDown / seta ↓)">Página →</button>
+   <button class="btn" id="nextSongBtn" onclick="nextSong()" title="Próxima música (seta →)">Música →</button>
   </div>
-  <button class="btn" onclick="fontSize(2)">A+</button>
-  <button class="btn" onclick="fullscreen()">Tela cheia</button>
-  <button class="btn primary" id="nextSongBtn" onclick="nextSong()">Próxima música →</button>
+  <span class="sep"></span>
+  <div class="navGroup">
+   <button class="btn" onclick="changeTranspose(-1)" title="Baixar meio tom (-)">Tom −</button>
+   <button class="btn" onclick="resetTranspose()" title="Voltar ao tom original (0)">Original</button>
+   <button class="btn" onclick="changeTranspose(1)" title="Subir meio tom (+)">Tom +</button>
+   <button class="btn" onclick="chooseKey()" title="Digitar o tom desejado">Escolher tom</button>
+  </div>
+  <span class="sep"></span>
+  <div class="navGroup">
+   <button class="btn" onclick="fontSize(-1)" title="Diminuir fonte">A−</button>
+   <span id="fontInfo" class="fontInfo">16px</span>
+   <button class="btn" onclick="fontSize(1)" title="Aumentar fonte">A+</button>
+   <button class="btn" onclick="firstPage()" title="Voltar para a página 1 (R)">↺ Pág. 1</button>
+   <button class="btn" onclick="fullscreen()" title="Tela cheia (F)">Tela cheia</button>
+  </div>
  </div>
 </div>
 
@@ -101,7 +125,10 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
 const NOTES_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const NOTE_INDEX={"C":0,"B#":0,"C#":1,"DB":1,"D":2,"D#":3,"EB":3,"E":4,"FB":4,"E#":5,"F":5,"F#":6,"GB":6,"G":7,"G#":8,"AB":8,"A":9,"A#":10,"BB":10,"B":11,"CB":11};
 let db=JSON.parse(localStorage.getItem("setcifra-db")||'{"songs":[],"setlist":[],"prefs":{"font":18,"speed":0.65}}');
-let current=null,currentSetIndex=-1,transpose=0,scrolling=false,raf=null,lastTime=0,hideTimer=null,scrollTimer=null,scrollAccumulator=0;
+let current=null,currentSetIndex=-1,transpose=0,hideTimer=null;
+// Paginação do Modo Palco
+let pages=[],currentPage=0,repaginateTimer=null;
+const FONT_MIN=12,FONT_MAX=48,FONT_DEFAULT=16;
 
 function persist(){localStorage.setItem("setcifra-db",JSON.stringify(db))}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
@@ -125,7 +152,8 @@ function saveSong(){
  const detectedKey=extractDeclaredKey(content.value);
  if(detectedKey) key.value=detectedKey;
  let id=songId.value||uid(), old=db.songs.find(x=>x.id===id);
- let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0,scrollSpeed:old?.scrollSpeed??12,fontSize:old?.fontSize??16};
+ // scrollSpeed é mantido apenas por compatibilidade com backups antigos (não é mais usado no Modo Palco)
+ let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0,scrollSpeed:old?.scrollSpeed??12,fontSize:old?.fontSize??FONT_DEFAULT};
  if(old)Object.assign(old,s);else db.songs.push(s);persist();closeEditor();render();
 }
 function deleteCurrent(){if(confirm("Excluir esta música?")){db.songs=db.songs.filter(s=>s.id!==songId.value);db.setlist=db.setlist.filter(id=>id!==songId.value);persist();closeEditor();render()}}
@@ -133,7 +161,12 @@ function addSetlist(id){db.setlist.push(id);persist();render()}
 function removeSet(i){db.setlist.splice(i,1);persist();render()}
 function moveItem(i,d){let j=i+d;if(j<0||j>=db.setlist.length)return;[db.setlist[i],db.setlist[j]]=[db.setlist[j],db.setlist[i]];persist();render()}
 function clearSetlist(){if(confirm("Limpar repertório?")){db.setlist=[];persist();render()}}
-function startSetlist(){if(!db.setlist.length)return alert("Adicione músicas ao repertório.");currentSetIndex=0;openStage(db.setlist[0])}
+function startSetlist(){
+ if(!db.setlist.length)return alert("Adicione músicas ao repertório.");
+ const first=db.setlist.findIndex(id=>db.songs.some(s=>s.id===id));
+ if(first<0)return alert("As músicas do repertório não foram encontradas na biblioteca.");
+ openStage(db.setlist[first]);
+}
 
 function isChordLine(line){
  let t=line.trim(); if(!t)return false;
@@ -151,99 +184,208 @@ function transposeChordToken(tok,steps){
 function transposeLine(line,steps){
  return line.replace(/(?<![A-Za-z])([A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:\([^)]*\))?(?:[#b]?[0-9]+)*(?:\/[A-G](?:#|b)?)?)(?![A-Za-z])/g,m=>transposeChordToken(m,steps));
 }
-function renderSheet(){
+
+/* ================= PAGINAÇÃO ================= */
+
+// Converte a música em linhas já transpostas e classificadas
+function stageLines(){
+ return String(current.content||"").split("\n").map((line,i)=>{
+  const chord=isChordLine(line);
+  const blank=!line.trim();
+  return {i,text:chord?transposeLine(line,transpose):line,chord,blank,
+   cls:chord?"chordLine":blank?"plainLine":"lyricLine",
+   section:/^\s*\[[^\]]*\]/.test(line),h:0};
+ });
+}
+function lineHtml(l){return `<div class="${l.cls}">${esc(l.text)||"&nbsp;"}</div>`}
+
+// Agrupa linhas que não podem ser separadas entre páginas:
+// - linha de acordes + linha de letra logo abaixo;
+// - título de seção ([Refrão], [Verso]...) + o conteúdo que vem logo depois.
+function buildUnits(lines){
+ const units=[];
+ for(let i=0;i<lines.length;i++){
+  const l=lines[i],n=lines[i+1];
+  if(l.blank){units.push({lines:[l],blank:true});continue}
+  if(l.chord&&n&&!n.blank&&!n.chord){units.push({lines:[l,n]});i++;continue}
+  units.push({lines:[l]});
+ }
+ const merged=[];
+ for(let k=0;k<units.length;k++){
+  const u=units[k],nx=units[k+1];
+  const pureHeader=!u.blank&&u.lines.length===1&&u.lines[0].section&&!u.lines[0].chord;
+  if(pureHeader&&nx&&!nx.blank){merged.push({lines:[...u.lines,...nx.lines],sectionStart:true});k++;continue}
+  if(!u.blank&&u.lines[0].section)u.sectionStart=true;
+  merged.push(u);
+ }
+ return merged;
+}
+
+// Mede a altura real de cada linha usando a própria área da página (mesma largura e fonte)
+function measureUnits(units){
+ const all=units.flatMap(u=>u.lines);
+ sheet.innerHTML=all.map(lineHtml).join("");
+ const els=sheet.children;
+ all.forEach((l,idx)=>{l.h=els[idx]?els[idx].getBoundingClientRect().height:0});
+ units.forEach(u=>{u.h=u.lines.reduce((t,l)=>t+l.h,0)});
+}
+
+function availableHeight(){
+ const body=document.getElementById("stageBody");
+ const cs=getComputedStyle(body);
+ return Math.max(40,body.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-2);
+}
+
+// Divide a música em páginas conforme o espaço disponível na tela
+function paginate(){
+ const lines=stageLines();
+ let units=buildUnits(lines);
+ measureUnits(units);
+ const avail=availableHeight();
+ // Se um bloco sozinho for maior que a página (fonte muito grande), ele é dividido linha a linha
+ units=units.flatMap(u=>u.h>avail&&u.lines.length>1?u.lines.map(l=>({lines:[l],h:l.h,blank:l.blank})):[u]);
+
+ const sum=a=>a.reduce((t,x)=>t+x.h,0);
+ const result=[];
+ const pushPage=p=>{p=p.slice();while(p.length&&p[p.length-1].blank)p.pop();if(p.length)result.push(p)};
+ let page=[],h=0;
+ for(let k=0;k<units.length;k++){
+  const u=units[k];
+  if(!page.length&&u.blank)continue; // não começa página com linha vazia
+  if(!page.length||h+u.h<=avail){page.push(u);h+=u.h;continue}
+  // Não coube: tenta terminar a página no fim de uma estrofe/seção,
+  // desde que a página já esteja pelo menos 60% cheia.
+  let cut=-1,acc=0;
+  for(let j=0;j<page.length-1;j++){
+   acc+=page[j].h;
+   const breakHere=page[j].blank||page[j+1].sectionStart;
+   if(breakHere&&acc>=avail*0.6)cut=j;
+  }
+  let rest=null;
+  if(cut>=0){
+   rest=page.slice(cut+1);
+   while(rest.length&&rest[0].blank)rest.shift();
+   if(sum(rest)+u.h>avail)rest=null;
+  }
+  if(rest){pushPage(page.slice(0,cut+1));page=rest}
+  else{pushPage(page);page=[]}
+  h=sum(page);
+  k--; // tenta colocar o bloco atual novamente na nova página
+ }
+ pushPage(page);
+ if(!result.length)result.push([{lines:[{i:0,text:"",cls:"plainLine",h:0}],h:0}]);
+ return result;
+}
+
+function pageStartLine(){return pages[currentPage]?.[0]?.lines?.[0]?.i??0}
+
+function showPage(animate){
+ if(!pages.length)return;
+ currentPage=Math.max(0,Math.min(currentPage,pages.length-1));
+ sheet.innerHTML=pages[currentPage].flatMap(u=>u.lines).map(lineHtml).join("");
+ const label=`${currentPage+1} / ${pages.length}`;
+ document.getElementById("pageInfo").textContent=label;
+ document.getElementById("pagePill").textContent="Pág. "+label;
+ document.getElementById("prevPageBtn").disabled=currentPage<=0;
+ document.getElementById("nextPageBtn").disabled=currentPage>=pages.length-1;
+ updateSongButtons();
+ if(animate){sheet.classList.remove("turn");void sheet.offsetWidth;sheet.classList.add("turn")}
+}
+
+// Recalcula as páginas mantendo a posição de leitura (linha keepLine)
+function renderSheet(keepLine){
  if(!current)return;
- sheet.innerHTML=current.content.split("\n").map(line=>{
-  let chord=isChordLine(line), out=chord?transposeLine(line,transpose):line;
-  return `<div class="${chord?"chordLine":line.trim()?"lyricLine":"plainLine"}">${esc(out)||"&nbsp;"}</div>`;
- }).join("");
- let base=NOTE_INDEX[current.key.toUpperCase()]??0; keyPill.textContent="Tom: "+NOTES_SHARP[(base+transpose+120)%12];
+ let base=NOTE_INDEX[String(current.key||"C").toUpperCase()]??0; keyPill.textContent="Tom: "+NOTES_SHARP[(base+transpose+120)%12];
  stageName.textContent=current.title;stageArtist.textContent=current.artist||"";
- stageCount.textContent=currentSetIndex>=0?`${currentSetIndex+1} / ${db.setlist.length}`:"";
+ stageCount.textContent=currentSetIndex>=0?`Música ${currentSetIndex+1} / ${db.setlist.length}`:"";
+ document.getElementById("fontInfo").textContent=(current.fontSize??FONT_DEFAULT)+"px";
+ pages=paginate();
+ if(keepLine!=null){
+  let idx=pages.findIndex(p=>{const ls=p.flatMap(u=>u.lines);return ls[ls.length-1].i>=keepLine});
+  currentPage=idx<0?pages.length-1:idx;
+ }
+ showPage(false);
+}
+
+function nextPage(){if(!current)return;if(currentPage<pages.length-1){currentPage++;showPage(true)}}
+function prevPage(){if(!current)return;if(currentPage>0){currentPage--;showPage(true)}}
+function firstPage(){if(!current)return;currentPage=0;showPage(true)}
+function lastPage(){if(!current)return;currentPage=pages.length-1;showPage(true)}
+
+function applyFont(){document.documentElement.style.setProperty("--fs",(current?.fontSize??FONT_DEFAULT)+"px")}
+
+// Carrega a música atual: página 1, tom salvo e fonte salva
+function loadCurrentSong(){
+ transpose=current.preferredTranspose||0;
+ if(current.fontSize==null||current.fontSize===26)current.fontSize=FONT_DEFAULT;
+ applyFont();
+ currentPage=0;
+ renderSheet(0);
+ wakeControls();
 }
 function openStage(id){
  current=db.songs.find(s=>s.id===id);if(!current)return;
- let idx=db.setlist.indexOf(id);currentSetIndex=idx>=0?idx:-1;transpose=current.preferredTranspose||0;
- if(current.scrollSpeed==null) current.scrollSpeed=12;
- if(current.scrollSpeed<=3) current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));
- persist();
- if(current.fontSize==null || current.fontSize===26) current.fontSize=16;
- stage.classList.remove("hidden");document.documentElement.style.setProperty("--fs",current.fontSize+"px");renderSheet();updateSpeedDisplay();stage.scrollTop=0;wakeControls();
+ let idx=db.setlist.indexOf(id);currentSetIndex=idx>=0?idx:-1;
+ stage.classList.remove("hidden");stage.scrollTop=0;
+ loadCurrentSong();
 }
-function exitStage(){stopScroll();stage.classList.add("hidden");current=null}
-function changeTranspose(n){transpose=(transpose+n+12)%12;current.preferredTranspose=transpose;persist();renderSheet()}
-function resetTranspose(){transpose=0;current.preferredTranspose=0;persist();renderSheet()}
+function exitStage(){
+ clearTimeout(repaginateTimer);
+ if(document.fullscreenElement)document.exitFullscreen?.();
+ stage.classList.add("hidden");current=null;pages=[];currentPage=0;
+}
+function changeTranspose(n){if(!current)return;const keep=pageStartLine();transpose=(transpose+n+12)%12;current.preferredTranspose=transpose;persist();renderSheet(keep)}
+function resetTranspose(){if(!current)return;const keep=pageStartLine();transpose=0;current.preferredTranspose=0;persist();renderSheet(keep)}
 function chooseKey(){
- let base=NOTE_INDEX[current.key.toUpperCase()]??0;
+ if(!current)return;
+ let base=NOTE_INDEX[String(current.key||"C").toUpperCase()]??0;
  let desired=prompt("Digite o tom desejado (C, C#, D, D#, E, F, F#, G, G#, A, A# ou B):",NOTES_SHARP[(base+transpose)%12]);
- if(!desired)return;desired=desired.trim().toUpperCase();let idx=NOTE_INDEX[desired];if(idx===undefined)return alert("Tom inválido.");transpose=(idx-base+12)%12;current.preferredTranspose=transpose;persist();renderSheet();
+ if(!desired)return;desired=desired.trim().toUpperCase();let idx=NOTE_INDEX[desired];if(idx===undefined)return alert("Tom inválido.");
+ const keep=pageStartLine();transpose=(idx-base+12)%12;current.preferredTranspose=transpose;persist();renderSheet(keep);
 }
 function fontSize(d){
  if(!current)return;
- current.fontSize=Math.max(14,Math.min(56,(current.fontSize??16)+d));
+ const keep=pageStartLine();
+ current.fontSize=Math.max(FONT_MIN,Math.min(FONT_MAX,(current.fontSize??FONT_DEFAULT)+d));
  persist();
- document.documentElement.style.setProperty("--fs",current.fontSize+"px");
+ applyFont();
+ renderSheet(keep); // recalcula o número de páginas
 }
-function speed(d){
- if(!current)return;
- current.scrollSpeed=Math.max(1,Math.min(120,Math.round((Number(current.scrollSpeed)||12)+d)));
- persist();
- updateSpeedDisplay();
-}
-function setSpeed(v){
- if(!current)return;
- current.scrollSpeed=Math.max(1,Math.min(120,Math.round(Number(v)||12)));
- persist();
- updateSpeedDisplay();
-}
-function getRealSpeed(){
- if(!current)return 12;
- return Math.max(1,Math.min(120,Number(current.scrollSpeed)||12));
-}
-function updateSpeedDisplay(){
- const v=getRealSpeed();
- const display=document.getElementById("speedDisplay");
- const range=document.getElementById("speedRange");
- if(display) display.textContent=v+" px/s";
- if(range) range.value=v;
-}
-function toggleScroll(){
- if(scrolling) stopScroll();
- else startScroll();
-}
-function startScroll(){
- if(!current)return;
- stopScroll();
- scrolling=true;
- playBtn.textContent="⏸ Pausar";
- scrollAccumulator=stage.scrollTop;
- scrollTimer=setInterval(()=>{
-   if(!scrolling)return;
-   const pxPerSecond=getRealSpeed();
-   scrollAccumulator+=(pxPerSecond/20); // 20 atualizações por segundo
-   stage.scrollTop=Math.floor(scrollAccumulator);
-   if(stage.scrollTop+stage.clientHeight>=stage.scrollHeight-2){
-     stopScroll();
-   }
- },50);
-}
-function stopScroll(){
- scrolling=false;
- playBtn.textContent="▶ Rolar";
- if(scrollTimer){
-   clearInterval(scrollTimer);
-   scrollTimer=null;
+
+// Navegação entre músicas do repertório (ignora itens que não existem mais na biblioteca)
+function goSong(dir){
+ if(!current||currentSetIndex<0)return;
+ let i=currentSetIndex+dir;
+ while(i>=0&&i<db.setlist.length){
+  const s=db.songs.find(x=>x.id===db.setlist[i]);
+  if(s){currentSetIndex=i;current=s;loadCurrentSong();return}
+  i+=dir;
  }
 }
-function restartScroll(){
- stopScroll();
- scrollAccumulator=0;
- stage.scrollTop=0;
+function nextSong(){goSong(1)}
+function previousSong(){goSong(-1)}
+function updateSongButtons(){
+ const inSet=currentSetIndex>=0;
+ document.getElementById("previousSongBtn").disabled=!inSet||currentSetIndex<=0;
+ document.getElementById("nextSongBtn").disabled=!inSet||currentSetIndex>=db.setlist.length-1;
 }
-function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));persist();if(current.fontSize==null||current.fontSize===26)current.fontSize=16;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
-function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));persist();if(current.fontSize==null||current.fontSize===26)current.fontSize=16;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+
 function fullscreen(){if(!document.fullscreenElement)stage.requestFullscreen?.();else document.exitFullscreen?.()}
 function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer);hideTimer=setTimeout(()=>controls.classList.add("fade"),3500)}
+
+// Recalcula as páginas quando a janela muda de tamanho ou entra/sai da tela cheia
+function scheduleRepaginate(){
+ if(!current||stage.classList.contains("hidden"))return;
+ clearTimeout(repaginateTimer);
+ const keep=pageStartLine();
+ repaginateTimer=setTimeout(()=>{if(current)renderSheet(keep)},120);
+}
+window.addEventListener("resize",scheduleRepaginate);
+document.addEventListener("fullscreenchange",scheduleRepaginate);
+
+// Evita que o botão clicado fique com foco (senão Espaço/Enter o acionariam de novo)
+stage.addEventListener("click",e=>{const b=e.target.closest("button");if(b)b.blur()});
+
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
 function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.songs))throw 0;db=x;db.setlist=db.setlist||[];db.prefs=db.prefs||{font:18,speed:.65};persist();render();alert("Backup importado.");}catch{alert("Arquivo de backup inválido.")}};r.readAsText(f);e.target.value=""}
 
@@ -277,9 +419,28 @@ function processPastedChord(){
  if(detected){key.value=detected;processInfo.textContent="Tom detectado: "+detected;}
  else processInfo.textContent="Cifra organizada. Confira o tom antes de salvar.";
 }
+
+/* Atalhos do Modo Palco
+   PageDown / ↓ / Espaço = próxima página
+   PageUp / ↑ / Shift+Espaço = página anterior
+   → = próxima música | ← = música anterior
+   F = tela cheia | R ou Home = página 1 | End = última página
+   + / - = transpor | 0 = tom original */
 document.addEventListener("keydown",e=>{
  if(stage.classList.contains("hidden")||["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
- if(e.code==="Space"){e.preventDefault();toggleScroll()}else if(e.key==="ArrowRight")nextSong();else if(e.key==="ArrowLeft")previousSong();else if(e.key==="ArrowUp"){e.preventDefault();speed(-.02)}else if(e.key==="ArrowDown"){e.preventDefault();speed(.02)}else if(e.key==="+")changeTranspose(1);else if(e.key==="-")changeTranspose(-1);else if(e.key==="0")resetTranspose();else if(e.key.toLowerCase()==="f")fullscreen();else if(e.key.toLowerCase()==="r")restartScroll();
+ if(e.ctrlKey||e.metaKey||e.altKey)return;
+ const k=e.key;
+ if(k==="PageDown"||k==="ArrowDown"||(k===" "&&!e.shiftKey)){e.preventDefault();nextPage()}
+ else if(k==="PageUp"||k==="ArrowUp"||(k===" "&&e.shiftKey)){e.preventDefault();prevPage()}
+ else if(k==="ArrowRight"){e.preventDefault();nextSong()}
+ else if(k==="ArrowLeft"){e.preventDefault();previousSong()}
+ else if(k==="Home"){e.preventDefault();firstPage()}
+ else if(k==="End"){e.preventDefault();lastPage()}
+ else if(k==="+")changeTranspose(1);
+ else if(k==="-")changeTranspose(-1);
+ else if(k==="0")resetTranspose();
+ else if(k.toLowerCase()==="f"){e.preventDefault();fullscreen()}
+ else if(k.toLowerCase()==="r"){e.preventDefault();firstPage()}
 });
 if(!db.songs.length){
  db.songs=[
@@ -289,7 +450,7 @@ Em             C
 Use sua própria letra autorizada aqui
 
 G              D
-A rolagem acompanha sua apresentação
+As páginas acompanham sua apresentação
 Em              C
 E o tom pode mudar sem alterar a letra`},
  {id:uid(),title:"Teste de Transposição",artist:"SetCifra",key:"C",duration:"02:50",preferredTranspose:0,content:`C       G/B       Am
