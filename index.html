@@ -75,7 +75,7 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
  </div>
  <div class="stageBody"><div id="sheet" class="chordSheet"></div></div>
  <div id="controls" class="controls">
-  <button class="btn" onclick="previousSong()">←</button>
+  <button class="btn" id="previousSongBtn" onclick="previousSong()">← Música anterior</button>
   <button class="btn" onclick="changeTranspose(-1)">Tom −</button>
   <button class="btn" onclick="resetTranspose()">Original</button>
   <button class="btn" onclick="chooseKey()">Tom +</button>
@@ -92,7 +92,7 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
   </div>
   <button class="btn" onclick="fontSize(2)">A+</button>
   <button class="btn" onclick="fullscreen()">Tela cheia</button>
-  <button class="btn primary" onclick="nextSong()">Próxima →</button>
+  <button class="btn primary" id="nextSongBtn" onclick="nextSong()">Próxima música →</button>
  </div>
 </div>
 
