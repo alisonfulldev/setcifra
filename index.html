@@ -14,33 +14,17 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px}.card h2{margin:0 0 12px;font-size:17px}.song{padding:12px;border:1px solid var(--border);border-radius:10px;margin:8px 0;cursor:pointer}.song:hover{border-color:var(--accent)}.song small{color:var(--muted)}
 .hidden{display:none!important}.modal{position:fixed;inset:0;background:#000b;z-index:30;display:grid;place-items:center;padding:16px}.modalbox{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px}.field{margin:10px 0}.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:11px;border-radius:9px;border:1px solid var(--border);background:#0e0e11;color:white}.field textarea{min-height:320px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
 .stage{position:fixed;inset:0;background:#050505;z-index:20;overflow:auto}.stageHeader{position:sticky;top:0;z-index:4;background:#050505eF;backdrop-filter:blur(8px);border-bottom:1px solid #222;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}.stageTitle{min-width:0}.stageTitle b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stageTitle small{color:#aaa}
-.stageBody{max-width:1050px;margin:auto;padding:30px 24px 45vh}.chordSheet{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs);line-height:1.55;white-space:pre-wrap;word-break:normal}.chordLine{color:var(--accent);font-weight:800;min-height:1em}.lyricLine{color:#fff;min-height:1em}.plainLine{color:#ddd;min-height:1em}
+.stageBody{max-width:1050px;margin:auto;padding:18px 28px 30vh}.chordSheet{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs);line-height:1.28;white-space:pre-wrap;word-break:normal}.chordLine{color:var(--accent);font-weight:800;min-height:1em}.lyricLine{color:#fff;min-height:1em}.plainLine{color:#ddd;min-height:1em}
 .controls{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:7px;flex-wrap:wrap;justify-content:center;width:min(980px,95%);background:#111e;border:1px solid #333;padding:9px;border-radius:14px;transition:.25s}.controls.fade{opacity:.08}.controls:hover{opacity:1}.controls .btn{padding:9px 11px}
 .pill{color:#111;background:var(--accent);padding:6px 10px;border-radius:999px;font-weight:900}.muted{color:var(--muted)}.empty{padding:25px;text-align:center;color:var(--muted)}
 .setlistItem{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding:9px 0}.setlistItem:last-child{border:0}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.app{padding:12px}.stageBody{padding:24px 14px 45vh}.chordSheet{font-size:calc(var(--fs) * .85)}.stageHeader{align-items:flex-start}.controls{bottom:6px}}
-
-/* MODO PASTA DIGITAL */
-.stage{overflow:hidden}
-.stageBody{height:calc(100vh - 72px);max-width:none;margin:0;padding:14px 14px 105px;display:flex;justify-content:center;overflow:hidden;perspective:1600px}
-.pageViewport{position:relative;width:min(1100px,100%);height:100%;overflow:hidden;border-radius:18px}
-.chordSheet{height:100%;overflow:hidden;white-space:normal;background:linear-gradient(90deg,#111 0,#080809 4%,#080809 96%,#111 100%);border:1px solid #292930;border-radius:18px;padding:22px 26px 48px;box-shadow:inset 14px 0 24px #0008,inset -10px 0 20px #0005;transform-origin:left center}
-.pageContent{height:100%;overflow:hidden}
-.pageLine{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs);line-height:1.42;white-space:pre-wrap;min-height:1.42em}
-.pageLine.chordLine{color:var(--accent);font-weight:800}.pageLine.lyricLine{color:#fff}.pageLine.plainLine{color:#ddd}
-.pageIndicator{position:absolute;right:18px;bottom:12px;z-index:4;padding:6px 10px;border-radius:999px;background:#111e;border:1px solid #333;color:#ddd;font-weight:800;font-size:13px}
-.pageHint{position:absolute;left:18px;bottom:16px;z-index:4;color:#777;font-size:12px}
-.pageTap{position:absolute;top:0;bottom:0;width:17%;z-index:3;border:0;background:transparent;cursor:pointer}.pageTap.left{left:0}.pageTap.right{right:0}
-.flipNext{animation:flipNext .30s ease}.flipPrev{animation:flipPrev .30s ease}
-@keyframes flipNext{0%{transform:rotateY(0);opacity:1}48%{transform:rotateY(-10deg) translateX(-9px);opacity:.42}100%{transform:rotateY(0);opacity:1}}
-@keyframes flipPrev{0%{transform:rotateY(0);opacity:1}48%{transform:rotateY(10deg) translateX(9px);opacity:.42}100%{transform:rotateY(0);opacity:1}}
-@media(max-width:760px){.stageBody{height:calc(100vh - 82px);padding:8px 7px 98px}.chordSheet{padding:16px 12px 44px}.pageLine{font-size:calc(var(--fs) * .82);line-height:1.38}.pageHint{display:none}}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.app{padding:12px}.stageBody{padding:24px 14px 45vh}.chordSheet{font-size:var(--fs)}.stageHeader{align-items:flex-start}.controls{bottom:6px}}
 </style>
 </head>
 <body>
 <div class="app" id="home">
   <div class="top">
-    <div><div class="brand">Set<span>Cifra</span></div><div class="muted">Sua pasta digital de cifras</div></div>
+    <div><div class="brand">Set<span>Cifra</span></div><div class="muted">Seu repertório de palco</div></div>
     <div class="actions">
       <button class="btn" onclick="exportBackup()">Exportar</button>
       <button class="btn" onclick="document.getElementById('importFile').click()">Importar</button>
@@ -89,26 +73,33 @@ button,input,textarea,select{font:inherit}.app{max-width:1200px;margin:auto;padd
   <div class="stageTitle"><b id="stageName"></b><small id="stageArtist"></small></div>
   <div class="row" style="align-items:center"><span id="stageCount" class="muted"></span><span id="keyPill" class="pill"></span><button class="btn" id="headerPreviousBtn" onclick="previousSong()">← Anterior</button><button class="btn" onclick="exitStage()">Sair</button></div>
  </div>
- <div class="stageBody"><div id="pageViewport" class="pageViewport"><div id="sheet" class="chordSheet"><div id="pageContent" class="pageContent"></div><div class="pageHint">← página anterior • próxima página →</div><div id="pageIndicator" class="pageIndicator">1 / 1</div></div><button class="pageTap left" onclick="previousPage()" aria-label="Página anterior"></button><button class="pageTap right" onclick="nextPage()" aria-label="Próxima página"></button></div></div>
+ <div class="stageBody"><div id="sheet" class="chordSheet"></div></div>
  <div id="controls" class="controls">
-  <button class="btn" onclick="previousSong()">← Música</button>
-  <button class="btn" onclick="previousPage()">← Página</button>
-  <span id="bottomPageIndicator" class="pill">1 / 1</span>
-  <button class="btn primary" onclick="nextPage()">Página →</button>
+  <button class="btn" id="previousSongBtn" onclick="previousSong()">← Anterior</button>
   <button class="btn" onclick="changeTranspose(-1)">Tom −</button>
   <button class="btn" onclick="resetTranspose()">Original</button>
   <button class="btn" onclick="chooseKey()">Tom +</button>
   <button class="btn" onclick="fontSize(-2)">A−</button>
+  <button class="btn" onclick="toggleScroll()" id="playBtn">▶ Rolar</button>
+  <button class="btn" onclick="restartScroll()">↺</button>
+  <div style="display:flex;align-items:center;gap:7px;min-width:260px">
+  <button class="btn" onclick="speed(-1)" title="Diminuir velocidade">−</button>
+  <input id="speedRange" type="range" min="1" max="120" step="1" value="12"
+    oninput="setSpeed(Number(this.value))"
+    style="width:130px;accent-color:var(--accent)" aria-label="Velocidade da rolagem">
+  <span id="speedDisplay" style="min-width:62px;text-align:center;font-weight:800;color:var(--accent)">12 px/s</span>
+  <button class="btn" onclick="speed(1)" title="Aumentar velocidade">+</button>
+  </div>
   <button class="btn" onclick="fontSize(2)">A+</button>
   <button class="btn" onclick="fullscreen()">Tela cheia</button>
-  <button class="btn primary" onclick="nextSong()">Próxima música →</button>
+  <button class="btn primary" id="nextSongBtn" onclick="nextSong()">Próxima música →</button>
  </div>
 </div>
 
 <script>
 const NOTES_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const NOTE_INDEX={"C":0,"B#":0,"C#":1,"DB":1,"D":2,"D#":3,"EB":3,"E":4,"FB":4,"E#":5,"F":5,"F#":6,"GB":6,"G":7,"G#":8,"AB":8,"A":9,"A#":10,"BB":10,"B":11,"CB":11};
-let db=JSON.parse(localStorage.getItem("setcifra-db")||'{"songs":[],"setlist":[],"prefs":{"font":26,"speed":0.65}}');
+let db=JSON.parse(localStorage.getItem("setcifra-db")||'{"songs":[],"setlist":[],"prefs":{"font":18,"speed":0.65}}');
 let current=null,currentSetIndex=-1,transpose=0,scrolling=false,raf=null,lastTime=0,hideTimer=null,scrollTimer=null,scrollAccumulator=0;
 
 function persist(){localStorage.setItem("setcifra-db",JSON.stringify(db))}
@@ -253,7 +244,7 @@ function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetInde
 function fullscreen(){if(!document.fullscreenElement)stage.requestFullscreen?.();else document.exitFullscreen?.()}
 function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer);hideTimer=setTimeout(()=>controls.classList.add("fade"),3500)}
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
-function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.songs))throw 0;db=x;db.setlist=db.setlist||[];db.prefs=db.prefs||{font:26,speed:.65};persist();render();alert("Backup importado.");}catch{alert("Arquivo de backup inválido.")}};r.readAsText(f);e.target.value=""}
+function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.songs))throw 0;db=x;db.setlist=db.setlist||[];db.prefs=db.prefs||{font:18,speed:.65};persist();render();alert("Backup importado.");}catch{alert("Arquivo de backup inválido.")}};r.readAsText(f);e.target.value=""}
 
 
 function cleanPastedChord(raw){
@@ -285,138 +276,10 @@ function processPastedChord(){
  if(detected){key.value=detected;processInfo.textContent="Tom detectado: "+detected;}
  else processInfo.textContent="Cifra organizada. Confira o tom antes de salvar.";
 }
-
-let stagePages=[];
-let stagePageIndex=0;
-
-function pageItem(line){
-  const chord=isChordLine(line);
-  return {
-    text:chord?transposeLine(line,transpose):line,
-    cls:chord?"chordLine":(line.trim()?"lyricLine":"plainLine")
-  };
-}
-
-function renderPage(direction){
-  const pc=document.getElementById("pageContent");
-  if(!pc)return;
-
-  const page=stagePages[stagePageIndex]||[];
-  pc.innerHTML=page.map(x =>
-    `<div class="pageLine ${x.cls}">${esc(x.text)||"&nbsp;"}</div>`
-  ).join("");
-
-  const label=`${stagePageIndex+1} / ${stagePages.length||1}`;
-  const topIndicator=document.getElementById("pageIndicator");
-  const bottomIndicator=document.getElementById("bottomPageIndicator");
-  if(topIndicator)topIndicator.textContent=label;
-  if(bottomIndicator)bottomIndicator.textContent=label;
-
-  sheet.classList.remove("flipNext","flipPrev");
-  void sheet.offsetWidth;
-  if(direction)sheet.classList.add(direction==="next"?"flipNext":"flipPrev");
-}
-
-function paginateCurrentSong(){
-  if(!current)return;
-  const pc=document.getElementById("pageContent");
-  if(!pc)return;
-
-  const lines=current.content.split("\n").map(pageItem);
-  stagePages=[];
-  let page=[];
-  pc.innerHTML="";
-
-  const maxH=pc.clientHeight||500;
-
-  for(const item of lines){
-    const d=document.createElement("div");
-    d.className="pageLine "+item.cls;
-    d.textContent=item.text||"\u00a0";
-    pc.appendChild(d);
-
-    if(pc.scrollHeight>maxH && page.length){
-      pc.removeChild(d);
-      stagePages.push(page);
-      page=[item];
-      pc.innerHTML="";
-
-      const first=document.createElement("div");
-      first.className="pageLine "+item.cls;
-      first.textContent=item.text||"\u00a0";
-      pc.appendChild(first);
-    }else{
-      page.push(item);
-    }
-  }
-
-  if(page.length)stagePages.push(page);
-  if(!stagePages.length)stagePages=[[{text:"",cls:"plainLine"}]];
-  stagePageIndex=0;
-  renderPage();
-}
-
-function renderSheet(){
-  if(!current)return;
-  const base=NOTE_INDEX[current.key.toUpperCase()]??0;
-  keyPill.textContent="Tom: "+NOTES_SHARP[(base+transpose+120)%12];
-  stageName.textContent=current.title;
-  stageArtist.textContent=current.artist||"";
-  stageCount.textContent=currentSetIndex>=0?`${currentSetIndex+1} / ${db.setlist.length}`:"";
-  requestAnimationFrame(paginateCurrentSong);
-}
-
-function nextPage(){
-  if(stagePageIndex<stagePages.length-1){
-    stagePageIndex++;
-    renderPage("next");
-    return;
-  }
-  if(currentSetIndex>=0 && currentSetIndex<db.setlist.length-1){
-    nextSong();
-  }
-}
-
-function previousPage(){
-  if(stagePageIndex>0){
-    stagePageIndex--;
-    renderPage("prev");
-    return;
-  }
-  if(currentSetIndex>0){
-    previousSong();
-    setTimeout(()=>{
-      stagePageIndex=Math.max(0,stagePages.length-1);
-      renderPage("prev");
-    },80);
-  }
-}
-
-window.addEventListener("resize",()=>{
-  if(current && !stage.classList.contains("hidden"))renderSheet();
-});
-
 document.addEventListener("keydown",e=>{
-  if(stage.classList.contains("hidden"))return;
-  if(["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
-
-  if(e.code==="Space" || e.key==="ArrowRight" || e.key==="PageDown"){
-    e.preventDefault();
-    nextPage();
-  }else if(e.key==="ArrowLeft" || e.key==="PageUp"){
-    e.preventDefault();
-    previousPage();
-  }else if(e.key==="+"){
-    changeTranspose(1);
-  }else if(e.key==="-"){
-    changeTranspose(-1);
-  }else if(e.key==="0"){
-    resetTranspose();
-  }else if(e.key.toLowerCase()==="f"){
-    fullscreen();
-  }
+ if(stage.classList.contains("hidden")||["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
+ if(e.code==="Space"){e.preventDefault();toggleScroll()}else if(e.key==="ArrowRight")nextSong();else if(e.key==="ArrowLeft")previousSong();else if(e.key==="ArrowUp"){e.preventDefault();speed(-.02)}else if(e.key==="ArrowDown"){e.preventDefault();speed(.02)}else if(e.key==="+")changeTranspose(1);else if(e.key==="-")changeTranspose(-1);else if(e.key==="0")resetTranspose();else if(e.key.toLowerCase()==="f")fullscreen();else if(e.key.toLowerCase()==="r")restartScroll();
 });
-
 if(!db.songs.length){
  db.songs=[
  {id:uid(),title:"Canção de Exemplo",artist:"Demonstração",key:"G",duration:"03:20",preferredTranspose:0,content:`G              D
