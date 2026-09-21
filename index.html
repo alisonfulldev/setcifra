@@ -285,12 +285,138 @@ function processPastedChord(){
  if(detected){key.value=detected;processInfo.textContent="Tom detectado: "+detected;}
  else processInfo.textContent="Cifra organizada. Confira o tom antes de salvar.";
 }
-\nlet stagePages=[];\nlet stagePageIndex=0;\nfunction pageItem(line){\n const chord=isChordLine(line);\n return {text:chord?transposeLine(line,transpose):line,cls:chord?"chordLine":(line.trim()?"lyricLine":"plainLine")};\n}\nfunction renderPage(direction){\n const pc=document.getElementById("pageContent"); if(!pc)return;\n const page=stagePages[stagePageIndex]||[];\n pc.innerHTML=page.map(x=>`<div class="pageLine ${x.cls}">${esc(x.text)||"&nbsp;"}</div>`).join("");\n const label=`${stagePageIndex+1} / ${stagePages.length||1}`;\n pageIndicator.textContent=label; bottomPageIndicator.textContent=label;\n sheet.classList.remove("flipNext","flipPrev"); void sheet.offsetWidth;\n if(direction)sheet.classList.add(direction==="next"?"flipNext":"flipPrev");\n}\nfunction paginateCurrentSong(){\n if(!current)return; const pc=document.getElementById("pageContent"); if(!pc)return;\n const lines=current.content.split("\\n").map(pageItem); stagePages=[]; let page=[]; pc.innerHTML="";\n const maxH=pc.clientHeight||500;\n for(const item of lines){\n   const d=document.createElement("div"); d.className="pageLine "+item.cls; d.textContent=item.text||"\\u00a0"; pc.appendChild(d);\n   if(pc.scrollHeight>maxH && page.length){ pc.removeChild(d); stagePages.push(page); page=[item]; pc.innerHTML=""; const f=document.createElement("div"); f.className="pageLine "+item.cls; f.textContent=item.text||"\\u00a0"; pc.appendChild(f); } else page.push(item);\n }\n if(page.length)stagePages.push(page); if(!stagePages.length)stagePages=[[{text:"",cls:"plainLine"}]]; stagePageIndex=0; renderPage();\n}\nfunction renderSheet(){\n if(!current)return; let base=NOTE_INDEX[current.key.toUpperCase()]??0; keyPill.textContent="Tom: "+NOTES_SHARP[(base+transpose+120)%12];\n stageName.textContent=current.title; stageArtist.textContent=current.artist||""; stageCount.textContent=currentSetIndex>=0?`${currentSetIndex+1} / ${db.setlist.length}`:"";\n requestAnimationFrame(paginateCurrentSong);\n}\nfunction nextPage(){\n if(stagePageIndex<stagePages.length-1){stagePageIndex++;renderPage("next");return;}\n if(currentSetIndex>=0&&currentSetIndex<db.setlist.length-1)nextSong();\n}\nfunction previousPage(){\n if(stagePageIndex>0){stagePageIndex--;renderPage("prev");return;}\n if(currentSetIndex>0){previousSong();setTimeout(()=>{stagePageIndex=Math.max(0,stagePages.length-1);renderPage("prev")},40);}\n}\nwindow.addEventListener("resize",()=>{if(current&&!stage.classList.contains("hidden"))renderSheet()});\ndocument.addEventListener("keydown",e=>{
- if(stage.classList.contains("hidden")||["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
- if(e.code==="Space"||e.key==="ArrowRight"||e.key==="PageDown"){e.preventDefault();nextPage()}
- else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();previousPage()}
- else if(e.key==="+")changeTranspose(1);else if(e.key==="-")changeTranspose(-1);else if(e.key==="0")resetTranspose();else if(e.key.toLowerCase()==="f")fullscreen();
+
+let stagePages=[];
+let stagePageIndex=0;
+
+function pageItem(line){
+  const chord=isChordLine(line);
+  return {
+    text:chord?transposeLine(line,transpose):line,
+    cls:chord?"chordLine":(line.trim()?"lyricLine":"plainLine")
+  };
+}
+
+function renderPage(direction){
+  const pc=document.getElementById("pageContent");
+  if(!pc)return;
+
+  const page=stagePages[stagePageIndex]||[];
+  pc.innerHTML=page.map(x =>
+    `<div class="pageLine ${x.cls}">${esc(x.text)||"&nbsp;"}</div>`
+  ).join("");
+
+  const label=`${stagePageIndex+1} / ${stagePages.length||1}`;
+  const topIndicator=document.getElementById("pageIndicator");
+  const bottomIndicator=document.getElementById("bottomPageIndicator");
+  if(topIndicator)topIndicator.textContent=label;
+  if(bottomIndicator)bottomIndicator.textContent=label;
+
+  sheet.classList.remove("flipNext","flipPrev");
+  void sheet.offsetWidth;
+  if(direction)sheet.classList.add(direction==="next"?"flipNext":"flipPrev");
+}
+
+function paginateCurrentSong(){
+  if(!current)return;
+  const pc=document.getElementById("pageContent");
+  if(!pc)return;
+
+  const lines=current.content.split("\n").map(pageItem);
+  stagePages=[];
+  let page=[];
+  pc.innerHTML="";
+
+  const maxH=pc.clientHeight||500;
+
+  for(const item of lines){
+    const d=document.createElement("div");
+    d.className="pageLine "+item.cls;
+    d.textContent=item.text||"\u00a0";
+    pc.appendChild(d);
+
+    if(pc.scrollHeight>maxH && page.length){
+      pc.removeChild(d);
+      stagePages.push(page);
+      page=[item];
+      pc.innerHTML="";
+
+      const first=document.createElement("div");
+      first.className="pageLine "+item.cls;
+      first.textContent=item.text||"\u00a0";
+      pc.appendChild(first);
+    }else{
+      page.push(item);
+    }
+  }
+
+  if(page.length)stagePages.push(page);
+  if(!stagePages.length)stagePages=[[{text:"",cls:"plainLine"}]];
+  stagePageIndex=0;
+  renderPage();
+}
+
+function renderSheet(){
+  if(!current)return;
+  const base=NOTE_INDEX[current.key.toUpperCase()]??0;
+  keyPill.textContent="Tom: "+NOTES_SHARP[(base+transpose+120)%12];
+  stageName.textContent=current.title;
+  stageArtist.textContent=current.artist||"";
+  stageCount.textContent=currentSetIndex>=0?`${currentSetIndex+1} / ${db.setlist.length}`:"";
+  requestAnimationFrame(paginateCurrentSong);
+}
+
+function nextPage(){
+  if(stagePageIndex<stagePages.length-1){
+    stagePageIndex++;
+    renderPage("next");
+    return;
+  }
+  if(currentSetIndex>=0 && currentSetIndex<db.setlist.length-1){
+    nextSong();
+  }
+}
+
+function previousPage(){
+  if(stagePageIndex>0){
+    stagePageIndex--;
+    renderPage("prev");
+    return;
+  }
+  if(currentSetIndex>0){
+    previousSong();
+    setTimeout(()=>{
+      stagePageIndex=Math.max(0,stagePages.length-1);
+      renderPage("prev");
+    },80);
+  }
+}
+
+window.addEventListener("resize",()=>{
+  if(current && !stage.classList.contains("hidden"))renderSheet();
 });
+
+document.addEventListener("keydown",e=>{
+  if(stage.classList.contains("hidden"))return;
+  if(["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
+
+  if(e.code==="Space" || e.key==="ArrowRight" || e.key==="PageDown"){
+    e.preventDefault();
+    nextPage();
+  }else if(e.key==="ArrowLeft" || e.key==="PageUp"){
+    e.preventDefault();
+    previousPage();
+  }else if(e.key==="+"){
+    changeTranspose(1);
+  }else if(e.key==="-"){
+    changeTranspose(-1);
+  }else if(e.key==="0"){
+    resetTranspose();
+  }else if(e.key.toLowerCase()==="f"){
+    fullscreen();
+  }
+});
+
 if(!db.songs.length){
  db.songs=[
  {id:uid(),title:"Canção de Exemplo",artist:"Demonstração",key:"G",duration:"03:20",preferredTranspose:0,content:`G              D
