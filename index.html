@@ -124,7 +124,7 @@ function saveSong(){
  const detectedKey=extractDeclaredKey(content.value);
  if(detectedKey) key.value=detectedKey;
  let id=songId.value||uid(), old=db.songs.find(x=>x.id===id);
- let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0,scrollSpeed:old?.scrollSpeed??0.20,fontSize:old?.fontSize??26};
+ let s={id,title:title.value.trim(),artist:artist.value.trim(),key:key.value,duration:duration.value.trim(),content:content.value,preferredTranspose:old?.preferredTranspose||0,scrollSpeed:old?.scrollSpeed??12,fontSize:old?.fontSize??26};
  if(old)Object.assign(old,s);else db.songs.push(s);persist();closeEditor();render();
 }
 function deleteCurrent(){if(confirm("Excluir esta música?")){db.songs=db.songs.filter(s=>s.id!==songId.value);db.setlist=db.setlist.filter(id=>id!==songId.value);persist();closeEditor();render()}}
@@ -165,6 +165,7 @@ function openStage(id){
  let idx=db.setlist.indexOf(id);currentSetIndex=idx>=0?idx:-1;transpose=current.preferredTranspose||0;
  if(current.scrollSpeed==null) current.scrollSpeed=12;
  if(current.scrollSpeed<=3) current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));
+ persist();
  if(current.fontSize==null) current.fontSize=db.prefs?.font||26;
  stage.classList.remove("hidden");document.documentElement.style.setProperty("--fs",current.fontSize+"px");renderSheet();updateSpeedDisplay();stage.scrollTop=0;wakeControls();
 }
@@ -238,8 +239,8 @@ function restartScroll(){
  scrollAccumulator=0;
  stage.scrollTop=0;
 }
-function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
-function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+function nextSong(){if(currentSetIndex<0||currentSetIndex>=db.setlist.length-1)return;stopScroll();currentSetIndex++;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));persist();if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
+function previousSong(){if(currentSetIndex<=0)return;stopScroll();currentSetIndex--;current=db.songs.find(s=>s.id===db.setlist[currentSetIndex]);transpose=current?.preferredTranspose||0;if(current.scrollSpeed==null)current.scrollSpeed=12;if(current.scrollSpeed<=3)current.scrollSpeed=Math.max(1,Math.round(current.scrollSpeed*60));persist();if(current.fontSize==null)current.fontSize=26;document.documentElement.style.setProperty("--fs",current.fontSize+"px");stage.scrollTop=0;renderSheet();updateSpeedDisplay()}
 function fullscreen(){if(!document.fullscreenElement)stage.requestFullscreen?.();else document.exitFullscreen?.()}
 function wakeControls(){controls.classList.remove("fade");clearTimeout(hideTimer);hideTimer=setTimeout(()=>controls.classList.add("fade"),3500)}
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="setcifra-backup.json";a.click();URL.revokeObjectURL(a.href)}
